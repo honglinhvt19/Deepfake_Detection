@@ -1,8 +1,8 @@
 import tensorflow as tf
 from keras.layers import Input
 from keras.models import Model
-from xception import Xception
-from efficientnet import EfficientNet
+from .xception import Xception
+from .efficientnet import EfficientNet
 
 class FeatureExtractor(Model):
     def __init__(self, num_classes=1000, pretrained=True):

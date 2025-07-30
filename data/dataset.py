@@ -1,7 +1,8 @@
+
 import tensorflow as tf
 import numpy as np
 import os
-from preprocessing import preprocess_video
+from .preprocessing import preprocess_video
 
 class Dataset:
     def __init__(self, data_dir, batch_size=32, num_frames=8, frame_size=(299, 299), training=True):

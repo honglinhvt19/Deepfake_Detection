@@ -1,8 +1,8 @@
 import tensorflow as tf
 from keras.layers import Dense, LayerNormalization, Dropout, MultiHeadAttention
 from keras.models import Model
-from feature_extractor import FeatureExtractor
-from fusion import Fusion
+from .feature_extractor import FeatureExtractor
+from .fusion import Fusion
 
 class Transformer(Model):
     def __init__(self, num_classes=2, num_frames=8, embed_dims=512, num_heads=8,
@@ -75,19 +75,3 @@ def create_transformer_model(num_classes=2, num_frames=8, embed_dims=512, num_he
                                 dropout_rate=dropout_rate, use_spatial_attention=use_spatial_attention)
     outputs = transformer(fusion_features)
     return Model(inputs=inputs, outputs=outputs, name='TransformerModel')
-
-if __name__ == "__main__":
-    model = create_transformer_model(
-        num_classes=2,
-        num_frames=8,
-        embed_dims=512,
-        num_heads=8,
-        ff_dim=2048,
-        num_transformer_layers=4,
-        dropout_rate=0.1,
-        use_spatial_attention=True)
-    model.summary()
-            
-
-
-

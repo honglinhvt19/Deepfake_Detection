@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.layers import Concatenate, Dense, BatchNormalization
 from keras.models import Model
-from feature_extractor import FeatureExtractor
+from .feature_extractor import FeatureExtractor
 
 class Fusion(Model):
     def __init__(self, embed_dims=512):
