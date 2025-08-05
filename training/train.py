@@ -4,6 +4,7 @@ from data.dataset import Dataset
 from models.model import ModelBuilder
 from utils.checkpoint import create_checkpoint_callback
 from utils.logger import Logger
+import tensorflow as tf
 
 def train(config_path):
     # Đọc cấu hình
@@ -17,14 +18,14 @@ def train(config_path):
         num_frames=config['data']['num_frames'],
         frame_size=tuple(config['data']['frame_size']),
         training=True
-    ).as_dataset()
+    ).tf.data.Dataset.as_dataset()
     val_dataset = Dataset(
         data_dir=config['data']['data_dir'] + '/val',
         batch_size=config['data']['batch_size'],
         num_frames=config['data']['num_frames'],
         frame_size=tuple(config['data']['frame_size']),
         training=False
-    ).as_dataset()
+    ).tf.data.Dataset.as_dataset()
     
     # Khởi tạo mô hình
     model_builder = ModelBuilder(
