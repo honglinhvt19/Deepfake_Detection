@@ -17,14 +17,14 @@ def train(config_path):
         num_frames=config['data']['num_frames'],
         frame_size=tuple(config['data']['frame_size']),
         training=True
-    )
+    ).as_dataset()
     val_dataset = Dataset(
         data_dir=config['data']['data_dir'] + '/val',
         batch_size=config['data']['batch_size'],
         num_frames=config['data']['num_frames'],
         frame_size=tuple(config['data']['frame_size']),
         training=False
-    )
+    ).as_dataset()
     
     # Khởi tạo mô hình
     model_builder = ModelBuilder(
