@@ -25,7 +25,7 @@ def train(config_path):
         num_frames=config['data']['num_frames'],
         frame_size=tuple(config['data']['frame_size']),
         training=False
-    )..as_dataset()
+    ).as_dataset()
     
     # Khởi tạo mô hình
     model_builder = ModelBuilder(
