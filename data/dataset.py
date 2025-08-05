@@ -25,3 +25,13 @@ class Dataset:
                 video_path = os.path.join(class_path, video_name)
 
         return video_paths, labels
+
+    def as_dataset(self):
+        output_signature = (
+            tf.TensorSpec(shape=(self.num_frames, *self.frame_size, 3), dtype=tf.float32),
+            tf.TensorSpec(shape=(), dtype=tf.int32)
+        )
+        dataset = tf.data.Dataset.from_generator(self._generator, output_signature=output_signature)
+        if self.training:
+            dataset = dataset.shuffle(100)
+        return dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
