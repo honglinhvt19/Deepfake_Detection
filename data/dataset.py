@@ -22,4 +22,6 @@ class Dataset:
             if not os.path.exists(class_path):
                 continue
             for video_name in os.listdir(class_path):
-                video_path = os.join(class_path, video_name)
+                video_path = os.path.join(class_path, video_name)
+
+        return video_paths, labels
