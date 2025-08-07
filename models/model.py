@@ -5,7 +5,7 @@ from .fusion import Fusion
 from .transformer import Transformer
 
 class ModelBuilder:
-    def __init__(self, num_classes=2, num_frames=8, embed_dims=512, num_heads=8,
+    def __init__(self, num_classes=1, num_frames=8, embed_dims=512, num_heads=8,
                  ff_dim=2048, num_transformer_layers=4, dropout_rate=0.1, use_spatial_attention=True):
         self.num_classes = num_classes
         self.num_frames = num_frames

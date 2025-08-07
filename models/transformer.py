@@ -59,7 +59,7 @@ class Transformer(Model):
 
         return x
     
-def create_transformer_model(num_classes=2, num_frames=8, embed_dims=512, num_heads=8,
+def create_transformer_model(num_classes=1, num_frames=8, embed_dims=512, num_heads=8,
                              ff_dim=2048, num_transformer_layers=4, dropout_rate=0.1, use_spatial_attention=True):
     
     inputs = tf.keras.Input(shape=(num_frames, 299 , 299, 3))
