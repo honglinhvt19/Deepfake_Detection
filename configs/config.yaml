@@ -19,7 +19,7 @@ training:
   epochs: 50
   learning_rate: 0.001
   optimizer: "adam"
-  loss: "categorical_crossentropy"
+  loss: "binary_crossentropy"
   metrics: ["accuracy"]
   checkpoint_dir: "./checkpoints"
   log_dir: "./logs"
