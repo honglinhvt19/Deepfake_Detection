@@ -5,7 +5,7 @@ from .feature_extractor import FeatureExtractor
 from .fusion import Fusion
 
 class Transformer(Model):
-    def __init__(self, num_classes=2, num_frames=8, embed_dims=512, num_heads=8,
+    def __init__(self, num_classes=1, num_frames=8, embed_dims=512, num_heads=8,
                   ff_dim=2048, num_transformer_layers=4, dropout_rate=0.1, use_spatial_attention=True):
         super(Transformer, self).__init__()
 
@@ -34,7 +34,7 @@ class Transformer(Model):
             self.spatial_norm = LayerNormalization(epsilon=1e-6)
 
         self.global_pool = tf.keras.layers.GlobalAveragePooling1D()
-        self.classifier = Dense(num_classes, activation='softmax', kernel_initializer='he_normal')
+        self.classifier = Dense(num_classes, activation='sigmoid', kernel_initializer='he_normal')
 
     def call(self, inputs, training=False):
         # inputs shape: [batch_size, num_frames, embed_dims]

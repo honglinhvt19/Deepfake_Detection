@@ -17,7 +17,16 @@ def extracts_frames(video_path, num_frames = 8, frame_size = (299, 299)):
         ret, frame = cap.read()
         if not ret:
             continue
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Đảm bảo frame luôn là 3 kênh RGB
+        if len(frame.shape) == 2:
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+        elif frame.shape[2] == 1:
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+        elif frame.shape[2] == 4:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        else:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, frame_size)
         frames.append(frame)
 
