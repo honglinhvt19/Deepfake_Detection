@@ -10,7 +10,7 @@ model:
 
 data:
   data_dir: "/kaggle/working/DoAnNganh/dataset"
-  batch_size: 32
+  batch_size: 4
   num_frames: 8
   frame_size: [299, 299]
   normalize: true
