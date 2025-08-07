@@ -11,7 +11,7 @@ class Dataset:
         self.num_frames = num_frames
         self.frame_size = frame_size
         self.training = training
-        self.video_path, self.labels = self._load_data()
+        self.video_paths, self.labels = self._load_data()
 
     def _load_data(self):
         video_paths = []
@@ -23,6 +23,8 @@ class Dataset:
                 continue
             for video_name in os.listdir(class_path):
                 video_path = os.path.join(class_path, video_name)
+                video_paths.append(video_path)
+                labels.append(label)
 
         return video_paths, labels
 
