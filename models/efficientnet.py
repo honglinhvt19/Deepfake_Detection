@@ -54,8 +54,8 @@ class EfficientNet(Model):
     def extract_features(self, inputs, training=False):
         features = self.base_model(inputs, training=training)
         features = self.global_pool(features)
-        features = self.dense1(features)
-        features = self.bn1(features, training=training)
+        # features = self.dense1(features)
+        # features = self.bn1(features, training=training)
 
         return features
     
