@@ -13,7 +13,7 @@ def train(config_path):
         config = yaml.safe_load(f)
 
     freeze_epochs = config['training']['freeze_epochs']
-    fine_tune_lr = config['training']['fine_tune_lr']
+    fine_tune_lr = config['training']['fine-tune_lr']
     base_lr = config['training']['learning_rate']
     
     # Khởi tạo dataset
