@@ -9,7 +9,7 @@ model:
   use_spatial_attention: true
 
 data:
-  data_dir: "/kaggle/working/DoAnNganh/dataset"
+  data_dir: "/kaggle/input/dataset"
   batch_size: 4
   num_frames: 8
   frame_size: [299, 299]
