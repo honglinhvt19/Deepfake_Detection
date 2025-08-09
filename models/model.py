@@ -4,7 +4,7 @@ from .feature_extractor import FeatureExtractor
 from .fusion import Fusion
 from .transformer import Transformer
 
-class ModelBuilder:
+class ModelBuilder(Model):
     def __init__(self, num_classes=1, num_frames=8, embed_dims=512, num_heads=8,
                  ff_dim=2048, num_transformer_layers=4, dropout_rate=0.1, use_spatial_attention=True):
         self.num_classes = num_classes
