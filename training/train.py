@@ -5,7 +5,7 @@ from models.model import ModelBuilder
 from utils.checkpoint import create_checkpoint_callback
 from utils.logger import Logger
 import tensorflow as tf
-from optimizer import get_optimizer, set_submodel_trainable
+from .optimizer import get_optimizer, set_submodel_trainable
 
 def train(config_path):
     # Đọc cấu hình
