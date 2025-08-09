@@ -31,7 +31,7 @@ class Dataset:
     def _generator(self):
         for video_path, label in zip(self.video_paths, self.labels):
             video_tensor = preprocess_video(video_path, self.num_frames, self.frame_size)
-            yield video_tensor, label
+            yield video_tensor, tf.cast(label, tf.int32)
 
     def as_dataset(self):
         output_signature = (
