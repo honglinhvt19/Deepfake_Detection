@@ -16,6 +16,8 @@ def train(config_path):
     fine_tune_lr = config['training']['fine-tune_lr']
     base_lr = config['training']['learning_rate']
     optimizer_name = config['training']['optimizer']
+
+    total_epochs = config['training']['epochs']
     
     # Khởi tạo dataset
     train_dataset = Dataset(
