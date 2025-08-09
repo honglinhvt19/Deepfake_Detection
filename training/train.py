@@ -15,7 +15,7 @@ def train(config_path):
     freeze_epochs = config['training']['freeze_epochs']
     fine_tune_lr = config['training']['fine-tune_lr']
     base_lr = config['training']['learning_rate']
-        optimizer_name = config['training']['optimizer']
+    optimizer_name = config['training']['optimizer']
     
     # Khởi tạo dataset
     train_dataset = Dataset(
