@@ -27,3 +27,4 @@ class FeatureExtractor(Model):
 
         return xception_features, efficientnet_features
     
+    
