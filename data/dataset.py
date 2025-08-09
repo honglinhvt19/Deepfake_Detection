@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 import os
+import random
 from .preprocessing import preprocess_video
 
 class Dataset:
