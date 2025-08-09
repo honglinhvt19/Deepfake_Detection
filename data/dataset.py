@@ -26,7 +26,12 @@ class Dataset:
                 video_paths.append(video_path)
                 labels.append(label)
 
-        return video_paths, labels
+        combined = list(zip(video_paths, labels))
+        random.shuffle(combined)
+        video_paths, labels = zip(*combined)
+
+        return list(video_paths), list(labels)
+
 
     def _generator(self):
         for video_path, label in zip(self.video_paths, self.labels):
