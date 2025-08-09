@@ -71,7 +71,7 @@ def train(config_path):
         )
 
     if freeze_epochs >= total_epochs:
-    print("Training completed in Phase 1, no fine-tuning needed.")
+        print("Training completed in Phase 1, no fine-tuning needed.")
     return history_phase1, model
 
     unfound = set_submodel_trainable(model, "EfficientNet", True)
