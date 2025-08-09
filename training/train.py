@@ -48,9 +48,10 @@ def train(config_path):
     )
     model = model_builder.build()
     
-    found = set_submodel_trainable(model, 'efficient_net', False)
+    found = set_submodel_trainable(model, 'EfficientNet', False)
     if not found:
         print("Warning: Cannot find EffecientNet to Freeze.")
+        return None
     else:
         print(f"EfficientNet has been frozen first {freeze_epochs} epochs.")
 
@@ -77,7 +78,7 @@ def train(config_path):
         print("Training completed in Phase 1, no fine-tuning needed.")
     return history_phase1, model
 
-    unfound = set_submodel_trainable(model, "efficient_net", True)
+    unfound = set_submodel_trainable(model, "EfficientNet", True)
     if not unfound:
         print("Warning: Cannot find EfficientNet to unfreeze.")
     else:
