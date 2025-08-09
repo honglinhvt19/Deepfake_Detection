@@ -40,5 +40,5 @@ class Dataset:
         )
         dataset = tf.data.Dataset.from_generator(self._generator, output_signature=output_signature)
         if self.training:
-            dataset = dataset.shuffle(100)
+            dataset = dataset.shuffle(3000)
         return dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
