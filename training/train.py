@@ -35,8 +35,8 @@ def train(config_path):
         training=False
     ).as_dataset()
 
-    steps_per_epoch = len(train_dataset_obj.video_paths)
-    val_steps = len(val_dataset_obj.video_paths)
+    steps_per_epoch = len(train_dataset.video_paths)
+    val_steps = len(val_dataset.video_paths)
     
     # Khởi tạo mô hình
     model_builder = ModelBuilder(
