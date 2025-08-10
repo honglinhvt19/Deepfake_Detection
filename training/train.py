@@ -76,6 +76,7 @@ def train(config_path):
             train_dataset,
             validation_data=val_dataset,
             epochs=epochs_phase1,
+            steps_per_epoch=steps_per_epoch,
             callbacks=[checkpoint_callback, logger],
             verbose=1
         )
@@ -98,8 +99,9 @@ def train(config_path):
     history_phase2 = model.fit(
         train_dataset,
         validation_data=val_dataset,
-        epochs=total_epochs,  # Keras expects final epoch number; will continue from epochs_phase1 to total_epochs
+        epochs=total_epochs, 
         initial_epoch=epochs_phase1,
+        steps_per_epoch=steps_per_epoch,
         callbacks=[checkpoint_callback, logger],
         verbose=1
     )
