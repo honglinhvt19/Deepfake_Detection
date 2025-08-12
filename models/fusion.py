@@ -17,11 +17,14 @@ class Fusion(Layer):
         self.bn_projection = BatchNormalization()
         super(Fusion, self).build(input_shape)
 
-    def call(self, inputs, training=False):
+    def call(self, inputs, training=None):
         xception_features, efficientnet_features = inputs
         combined_features = self.concatenate([xception_features, efficientnet_features]) # [batch_size, 2048 + 1280]
         combined_features = self.feature_projection(combined_features) # [batch_size, embed_dim]
         combined_features = self.bn_projection(combined_features, training=training)
 
         return combined_features
+    
+    def compute_output_shape(self, input_shape):
+        return [(input_shape[0], input_shape[1], 2048), (input_shape[0], input_shape[1], 1280)]
     
