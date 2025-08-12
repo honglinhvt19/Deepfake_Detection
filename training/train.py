@@ -1,5 +1,6 @@
 import yaml
 import os
+import math
 from data.dataset import Dataset
 from models.model import ModelBuilder
 from utils.checkpoint import create_checkpoint_callback
@@ -36,8 +37,8 @@ def train(config_path):
         training=False
     )
 
-    steps_per_epoch = len(train_dataset.video_paths)//batch_size
-    val_steps = len(val_dataset.video_paths)//batch_size
+    steps_per_epoch = math.ceil(len(train_dataset.video_paths)/batch_size)
+    val_steps = math.ceil(len(val_dataset.video_paths)/batch_size)
 
     train_dataset = train_dataset.as_dataset()
     val_dataset = val_dataset.as_dataset()
