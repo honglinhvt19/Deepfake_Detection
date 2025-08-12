@@ -7,6 +7,7 @@ from utils.checkpoint import create_checkpoint_callback
 from utils.logger import Logger
 import tensorflow as tf
 from .optimizer import get_optimizer, set_submodel_trainable
+from models.efficientnet import EfficientNet
 
 def train(config_path):
     # Đọc cấu hình
@@ -62,7 +63,7 @@ def train(config_path):
         model(batch[0], training=True)  
     print("GPU warmup completed.")
     
-    found = set_submodel_trainable(model, 'EfficientNet', False)
+    found = set_submodel_trainable(model, EfficientNet, False)
     if not found:
         print("Warning: Cannot find EffecientNet to Freeze.")
         return None
@@ -90,11 +91,12 @@ def train(config_path):
             verbose=1
         )
 
+    history_phase2 = None   
     if freeze_epochs >= total_epochs:
         print("Training completed in Phase 1, no fine-tuning needed.")
-    return history_phase1, model
+        return history_phase1, model
 
-    unfound = set_submodel_trainable(model, "EfficientNet", True)
+    unfound = set_submodel_trainable(model, EfficientNet, True)
     if not unfound:
         print("Warning: Cannot find EfficientNet to unfreeze.")
     else:

@@ -26,6 +26,6 @@ def set_submodel_trainable(model: tf.keras.Model, target_class: type, trainable:
             found = True
         # if layer has sublayers (functional or nested), recurse
         if hasattr(layer, "layers") and len(layer.layers) > 0:
-            if set_submodel_trainable(layer, target_class_name, trainable):
+            if set_submodel_trainable(layer, target_class, trainable):
                 found = True
     return found
