@@ -78,6 +78,7 @@ def train(config_path):
             validation_data=val_dataset,
             epochs=epochs_phase1,
             steps_per_epoch=steps_per_epoch,
+            validation_steps=val_steps,
             callbacks=[checkpoint_callback, logger],
             verbose=1
         )
@@ -103,6 +104,7 @@ def train(config_path):
         epochs=total_epochs, 
         initial_epoch=epochs_phase1,
         steps_per_epoch=steps_per_epoch,
+        validation_steps=val_steps,
         callbacks=[checkpoint_callback, logger],
         verbose=1
     )
