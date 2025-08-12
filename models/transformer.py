@@ -13,6 +13,7 @@ class Transformer(Layer):
         self.embed_dims = embed_dims
         self.num_heads = num_heads
         self.ff_dim = ff_dim
+        self.dropout_rate = dropout_rate
         self.num_transformer_layers = num_transformer_layers
         self.use_spatial_attention = use_spatial_attention
         self.temporal_transformer_layers = []
