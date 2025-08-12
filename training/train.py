@@ -18,6 +18,7 @@ def train(config_path):
     optimizer_name = config['training']['optimizer']
 
     total_epochs = config['training']['epochs']
+    batch_size=config['data']['batch_size']
     
     # Khởi tạo dataset
     train_dataset = Dataset(
@@ -35,7 +36,7 @@ def train(config_path):
         training=False
     )
 
-    steps_per_epoch = len(train_dataset.video_paths)
+    steps_per_epoch = len(train_dataset.video_paths)//batch_size
     val_steps = len(val_dataset.video_paths)
 
     train_dataset = train_dataset.as_dataset()
