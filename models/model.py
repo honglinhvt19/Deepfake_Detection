@@ -23,7 +23,7 @@ class ModelBuilder():
         xception_features, efficientnet_features = feature_extractor(inputs)
 
         fusion = Fusion(embed_dims=self.embed_dims)
-        fusion_features = fusion(xception_features, efficientnet_features)
+        fusion_features = fusion([xception_features, efficientnet_features])
 
         transformer = Transformer(num_classes=self.num_classes, num_frames=self.num_frames,
                                   embed_dims=self.embed_dims, num_heads=self.num_heads,
