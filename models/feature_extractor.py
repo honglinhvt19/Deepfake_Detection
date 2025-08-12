@@ -30,7 +30,5 @@ class FeatureExtractor(Layer):
 
         return xception_features, efficientnet_features
     
-    def compute_output_shape(self, input_shape):
-        return [(input_shape[0], input_shape[1], 2048), (input_shape[0], input_shape[1], 1280)]
     
     

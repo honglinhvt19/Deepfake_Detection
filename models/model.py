@@ -4,9 +4,10 @@ from .feature_extractor import FeatureExtractor
 from .fusion import Fusion
 from .transformer import Transformer
 
-class ModelBuilder():
+class ModelBuilder(Model):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
                  ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True):
+        super(ModelBuilder, self).__init__()
         self.num_classes = num_classes
         self.num_frames = num_frames
         self.embed_dims = embed_dims
@@ -16,21 +17,28 @@ class ModelBuilder():
         self.dropout_rate = dropout_rate
         self.use_spatial_attention = use_spatial_attention
 
-    def build(self):
-        inputs = tf.keras.Input(shape=(self.num_frames, 299, 299, 3))
+        self.feature_extractor = FeatureExtractor()
+        self.fusion = Fusion(embed_dims=self.embed_dims)
+        self.transformer = Transformer(
+            num_classes=self.num_classes,
+            num_frames=self.num_frames,
+            embed_dims=self.embed_dims,
+            num_heads=self.num_heads,
+            ff_dim=self.ff_dim,
+            num_transformer_layers=self.num_transformer_layers,
+            dropout_rate=self.dropout_rate,
+            use_spatial_attention=self.use_spatial_attention
+        )
 
-        feature_extractor = FeatureExtractor()
-        xception_features, efficientnet_features = feature_extractor(inputs)
+    def call(self, inputs, training=None):
+        xception_features, efficientnet_features = self.feature_extractor(inputs, training=training)
+        fusion_features = self.fusion([xception_features, efficientnet_features], training=training)
+        outputs = self.transformer(fusion_features, training=training)
 
-        fusion = Fusion(embed_dims=self.embed_dims)
-        fusion_features = fusion([xception_features, efficientnet_features])
+        return outputs
+    
+    def create_model(self):
+        inputs = tf.keras.Input(shape=(self.num_frames, 299, 299, 3), name='input_videos')
+        outputs = self.call(inputs)
+        return Model(inputs=inputs, outputs=outputs, name='DeepfakeDetectionModel')
 
-        transformer = Transformer(num_classes=self.num_classes, num_frames=self.num_frames,
-                                  embed_dims=self.embed_dims, num_heads=self.num_heads,
-                                  ff_dim=self.ff_dim, num_transformer_layers=self.num_transformer_layers,
-                                  dropout_rate=self.dropout_rate,
-                                  use_spatial_attention=self.use_spatial_attention)
-        
-        outputs = transformer(fusion_features)
-
-        return Model(inputs=inputs, outputs=outputs, name='TransformerModel')

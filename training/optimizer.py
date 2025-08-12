@@ -13,19 +13,26 @@ def get_optimizer(name: str, lr: float):
 
 def set_submodel_trainable(model: tf.keras.Model, target_class: type, trainable: bool) -> bool:
     found = False
-    # traverse model and nested layers
-    for layer in model.layers:
+    
+    for layer in getattr(model, 'layers', []):
+        # 1. Nếu là instance của target_class
         if isinstance(layer, target_class):
             layer.trainable = trainable
-            # also set for its inner layers if present
-            try:
-                for sub in layer.layers:
-                    sub.trainable = trainable
-            except Exception:
-                pass
+            # set cho các sublayers nếu có
+            for sub in getattr(layer, 'layers', []):
+                sub.trainable = trainable
             found = True
-        # if layer has sublayers (functional or nested), recurse
-        if hasattr(layer, "layers") and len(layer.layers) > 0:
+        # 2. Nếu có attribute 'efficientnet' là instance của target_class
+        if hasattr(layer, 'efficientnet'):
+            eff = getattr(layer, 'efficientnet')
+            if isinstance(eff, target_class):
+                eff.trainable = trainable
+                # set cho các sublayers nếu có
+                for sub in getattr(eff, 'layers', []):
+                    sub.trainable = trainable
+                found = True
+        # 3. Đệ quy vào các sublayers
+        if hasattr(layer, 'layers') and len(layer.layers) > 0:
             if set_submodel_trainable(layer, target_class, trainable):
                 found = True
     return found
