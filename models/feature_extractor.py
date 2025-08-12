@@ -1,17 +1,20 @@
 import tensorflow as tf
-from keras.layers import Input
-from keras.models import Model
+from keras.layers import Input, Layer
 from .xception import Xception
 from .efficientnet import EfficientNet
 
-class FeatureExtractor(Model):
+class FeatureExtractor(Layer):
     def __init__(self, num_classes=1000, pretrained=True):
         super(FeatureExtractor, self).__init__()
-        
         self.num_classes = num_classes
+        self.pretrained = pretrained
+        self.xception = None
+        self.efficientnet = None
 
-        self.xception = Xception(num_classes=num_classes)
-        self.efficientnet = EfficientNet(num_classes=num_classes)
+    def build(self, input_shape):
+        self.xception = Xception(num_classes=self.num_classes)
+        self.efficientnet = EfficientNet(num_classes=self.num_classes, pretrained=self.pretrained)
+        super(FeatureExtractor, self).build(input_shape)
 
     def call(self, inputs, training=False):
         batch_size = tf.shape(inputs)[0]
@@ -26,5 +29,8 @@ class FeatureExtractor(Model):
         efficientnet_features = tf.reshape(efficientnet_features, [batch_size, num_frames, 1280])
 
         return xception_features, efficientnet_features
+    
+    def compute_output_shape(self, input_shape):
+        return [(input_shape[0], input_shape[1], 2048), (input_shape[0], input_shape[1], 1280)]
     
     

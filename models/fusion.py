@@ -1,18 +1,24 @@
 import tensorflow as tf
-from keras.layers import Concatenate, Dense, BatchNormalization
-from keras.models import Model
+from keras.layers import Concatenate, Dense, BatchNormalization, Layer
 from .feature_extractor import FeatureExtractor
 
-class Fusion(Model):
+class Fusion(Layer):
     def __init__(self, embed_dims=512):
         super(Fusion, self).__init__()
-
         self.embed_dims = embed_dims
-        self.concatenate = Concatenate()
-        self.feature_projection = Dense(embed_dims, activation='relu', kernel_initializer='he_normal')
-        self.bn_projection = BatchNormalization()
+        self.embed_dims = embed_dims
+        self.concatenate = None
+        self.feature_projection = None
+        self.bn_projection = None
 
-    def call(self, xception_features, efficientnet_features, training=False):
+    def build(self, input_shape):
+        self.concatenate = Concatenate()
+        self.feature_projection = Dense(self.embed_dims, kernel_initializer='he_normal', dtype='float32')
+        self.bn_projection = BatchNormalization()
+        super(Fusion, self).build(input_shape)
+
+    def call(self, inputs, training=False):
+        xception_features, efficientnet_features = inputs
         combined_features = self.concatenate([xception_features, efficientnet_features]) # [batch_size, 2048 + 1280]
         combined_features = self.feature_projection(combined_features) # [batch_size, embed_dim]
         combined_features = self.bn_projection(combined_features, training=training)

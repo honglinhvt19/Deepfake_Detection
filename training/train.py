@@ -55,6 +55,12 @@ def train(config_path):
         use_spatial_attention=config['model']['use_spatial_attention']
     )
     model = model_builder.build()
+
+    # Warmup GPU
+    print("Running GPU warmup...")
+    for batch in train_dataset.take(1):
+        model(batch[0], training=True)  
+    print("GPU warmup completed.")
     
     found = set_submodel_trainable(model, 'EfficientNet', False)
     if not found:
