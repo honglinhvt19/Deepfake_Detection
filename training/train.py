@@ -37,7 +37,7 @@ def train(config_path):
     )
 
     steps_per_epoch = len(train_dataset.video_paths)//batch_size
-    val_steps = len(val_dataset.video_paths)
+    val_steps = len(val_dataset.video_paths)//batch_size
 
     train_dataset = train_dataset.as_dataset()
     val_dataset = val_dataset.as_dataset()
