@@ -12,7 +12,7 @@ class Fusion(Layer):
         self.bn_projection = None
 
     def build(self, input_shape):
-        self.concatenate = Concatenate()
+        self.concatenate = Concatenate(axis=-1) 
         self.feature_projection = Dense(self.embed_dims, kernel_initializer='he_normal', dtype='float32')
         self.bn_projection = BatchNormalization()
         super(Fusion, self).build(input_shape)
@@ -26,5 +26,5 @@ class Fusion(Layer):
         return combined_features
     
     def compute_output_shape(self, input_shape):
-        return [(input_shape[0], input_shape[1], 2048), (input_shape[0], input_shape[1], 1280)]
+        return (input_shape[0][0], input_shape[0][1], self.embed_dims)
     
