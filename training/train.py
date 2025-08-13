@@ -55,7 +55,7 @@ def train(config_path):
         dropout_rate=config['model']['dropout_rate'],
         use_spatial_attention=config['model']['use_spatial_attention']
     )
-    model = model_builder.build()
+    model = model_builder.create_model()
 
     # Warmup GPU
     print("Running GPU warmup...")
