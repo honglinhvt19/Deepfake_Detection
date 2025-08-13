@@ -10,9 +10,9 @@ model:
 
 data:
   data_dir: "/kaggle/input/celeb-df/dataset"
-  batch_size: 8
+  batch_size: 4
   num_frames: 4
-  frame_size: [299, 299]
+  frame_size: [224, 224]
   normalize: true
 
 training:
