@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-def extracts_frames(video_path, num_frames = 8, frame_size = (299, 299)):
+def extracts_frames(video_path, num_frames = 8, frame_size = (224, 224)):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if total_frames == 0:
@@ -35,7 +35,7 @@ def extracts_frames(video_path, num_frames = 8, frame_size = (299, 299)):
     while len(frames) < num_frames:
         frames.append(frames[-1] if frames else np.zeros((frame_size[0], frame_size[1], 3), dtype=np.uint8))
 
-    return np.array(frames)[:num_frames] #[num_frames, 299, 299, 3]
+    return np.array(frames)[:num_frames] #[num_frames, 224, 224, 3]
 
 def preprocess_frame(frame, normalize = True):
     frame = frame.astype(np.float32)
@@ -51,7 +51,7 @@ def augment_frame(frame):
     frame  = tf.image.random_contrast(frame, lower=0.9, upper=1.1)
     return frame
 
-def preprocess_video(video_path, num_frames=8, frame_size=(299, 299), training=False, normalize=True):
+def preprocess_video(video_path, num_frames=8, frame_size=(224, 224), training=False, normalize=True):
     frames = extracts_frames(video_path, num_frames, frame_size)
     if frames is None:
         return None
@@ -63,7 +63,7 @@ def preprocess_video(video_path, num_frames=8, frame_size=(299, 299), training=F
             frame = augment_frame(frame)
         processed_frames.append(frame)
     
-    frames = np.array(processed_frames, dtype=np.float32)  # [num_frames, 299, 299, 3]
+    frames = np.array(processed_frames, dtype=np.float32)  # [num_frames, 224, 224, 3]
 
     return frames
     

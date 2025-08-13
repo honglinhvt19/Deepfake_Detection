@@ -6,7 +6,7 @@ import random
 from .preprocessing import preprocess_video
 
 class Dataset:
-    def __init__(self, data_dir, batch_size=32, num_frames=8, frame_size=(299, 299), training=True, video_paths=None, labels=None):
+    def __init__(self, data_dir, batch_size=32, num_frames=8, frame_size=(224, 224), training=True, video_paths=None, labels=None):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_frames = num_frames
