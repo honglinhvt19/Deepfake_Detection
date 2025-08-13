@@ -38,7 +38,7 @@ class ModelBuilder(Model):
         return outputs
     
     def create_model(self):
-        inputs = tf.keras.Input(shape=(self.num_frames, 299, 299, 3), name='input_videos')
+        inputs = tf.keras.Input(shape=(self.num_frames, 224, 224, 3), name='input_videos')
         outputs = self.call(inputs)
         return Model(inputs=inputs, outputs=outputs, name='DeepfakeDetectionModel')
 

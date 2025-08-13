@@ -20,7 +20,7 @@ class FeatureExtractor(Layer):
         batch_size = tf.shape(inputs)[0]
         num_frames = tf.shape(inputs)[1]
         
-        input_flat = tf.reshape(inputs, [-1, 299, 299, 3]) # [batch_size * num_frames, 299, 299, 3]
+        input_flat = tf.reshape(inputs, [-1, 224, 224, 3]) # [batch_size * num_frames, 299, 299, 3]
         
         xception_features = self.xception.extract_features(input_flat, training=training)
         efficientnet_features = self.efficientnet.extract_features(input_flat, training=training)

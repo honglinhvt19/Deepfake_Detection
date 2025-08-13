@@ -18,7 +18,7 @@ class EfficientNet(Model):
 
         self.base_model = EfficientNetB0(include_top=False,
                                         weights='imagenet' if pretrained else None,
-                                        input_shape=(299, 299, 3)
+                                        input_shape=(224, 224, 3)
                                         )
         
         for layer in self.base_model.layers[:freeze_layers]:
