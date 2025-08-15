@@ -5,7 +5,7 @@ from keras.initializers import RandomNormal, Constant
 import math
 
 class block(Model):
-    def __init__(self, in_filters, out_filters, reps, strides=1, start_with_relu=True, grow_first=True):
+    def __init__(self, in_filters, out_filters, reps, strides=1, start_with_relu=True, grow_first=True, **kwargs):
         super(block, self).__init__(**kwargs)
         self.in_filters = in_filters
         self.out_filters = out_filters

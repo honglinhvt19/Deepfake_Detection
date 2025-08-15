@@ -6,7 +6,7 @@ from .transformer import Transformer
 
 class ModelBuilder(Model):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
-                 ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True):
+                 ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True, **kwargs):
         super(ModelBuilder, self).__init__(**kwargs)
         self.num_classes = num_classes
         self.num_frames = num_frames

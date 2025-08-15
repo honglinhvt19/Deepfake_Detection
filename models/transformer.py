@@ -5,7 +5,7 @@ from .fusion import Fusion
 
 class Transformer(Layer):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
-                  ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True):
+                  ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True, **kwargs):
         super(Transformer, self).__init__(**kwargs)
 
         self.num_classes = num_classes

@@ -10,7 +10,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class EfficientNet(Model):
-    def __init__(self, num_classes=1000, freeze_layers=100, pretrained=True):
+    def __init__(self, num_classes=1000, freeze_layers=100, pretrained=True, **kwargs):
         super(EfficientNet, self).__init__(**kwargs)
 
         self.num_classes = num_classes
