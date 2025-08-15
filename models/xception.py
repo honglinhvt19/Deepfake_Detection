@@ -6,7 +6,13 @@ import math
 
 class block(Model):
     def __init__(self, in_filters, out_filters, reps, strides=1, start_with_relu=True, grow_first=True):
-        super(block, self).__init__()
+        super(block, self).__init__(**kwargs)
+        self.in_filters = in_filters
+        self.out_filters = out_filters
+        self.reps = reps
+        self.strides = strides
+        self.start_with_relu = start_with_relu
+        self.grow_first = grow_first
 
         if in_filters != out_filters or strides != 1:
             self.skip = [
@@ -51,6 +57,22 @@ class block(Model):
         
         self.main_branch = layers
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'in_filters': self.in_filters,
+            'out_filters': self.out_filters,
+            'reps': self.reps,
+            'strides': self.strides,
+            'start_with_relu': self.start_with_relu,
+            'grow_first': self.grow_first
+        })
+        return config
+    
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
     def call(self, inputs, training=False):
         x = inputs
         for layer in self.main_branch:
@@ -69,6 +91,7 @@ class block(Model):
 class Xception(Model):
     def __init__(self, num_classes=1000):
         super(Xception, self).__init__()
+        self.num_classes = num_classes
 
         self.num_classes = num_classes
 
@@ -205,4 +228,13 @@ class Xception(Model):
         if pretrained:
             pass
         return model
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({'num_classes': self.num_classes})
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 

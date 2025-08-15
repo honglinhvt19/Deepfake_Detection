@@ -11,7 +11,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class EfficientNet(Model):
     def __init__(self, num_classes=1000, freeze_layers=100, pretrained=True):
-        super(EfficientNet, self).__init__()
+        super(EfficientNet, self).__init__(**kwargs)
 
         self.num_classes = num_classes
         self.freeze_layers = freeze_layers
@@ -29,7 +29,7 @@ class EfficientNet(Model):
         self.global_pool = GlobalAveragePooling2D()
         self.dense1 = Dense(1024, activation='relu', kernel_initializer='he_normal')
         self.bn1 = BatchNormalization()
-        self.fc = Dense(num_classes, activation='softmax', kernel_initializer='he_normal')
+        self.fc = Dense(num_classes, activation='sigmoid', kernel_initializer='he_normal')
 
         for layer in self.layers:
             if isinstance(layer, (tf.keras.layers.Conv2D, tf.keras.layers.SeparableConv2D)):
@@ -63,4 +63,13 @@ class EfficientNet(Model):
         model = EfficientNet(pretrained, **kwargs)
 
         return model
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({'num_classes': self.num_classes, 'freeze_layers': self.freeze_layers, 'pretrained': self.pretrained})
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
          

@@ -1,6 +1,12 @@
 import tensorflow as tf
 import os
 import re
+from models.xception import Xception, block
+from models.efficientnet import EfficientNet
+from models.feature_extractor import FeatureExtractor
+from models.fusion import Fusion
+from models.transformer import Transformer
+from models.model import ModelBuilder
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -38,7 +44,15 @@ def load_checkpoint(model, checkpoint_path):
 
     if latest_checkpoint:
         try:
-            model.load_weights(latest_checkpoint)
+            model = tf.keras.models.load_model(latest_checkpoint, custom_objects={
+                'block': block,
+                'Xception': Xception,
+                'EfficientNet': EfficientNet,
+                'FeatureExtractor': FeatureExtractor,
+                'Fusion': Fusion,
+                'Transformer': Transformer,
+                'ModelBuilder': ModelBuilder
+            })
             print(f"Load weight from {latest_checkpoint} at epoch {latest_epoch}")
             return model, latest_epoch
         except Exception as e:

@@ -6,7 +6,7 @@ from .fusion import Fusion
 class Transformer(Layer):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
                   ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True):
-        super(Transformer, self).__init__()
+        super(Transformer, self).__init__(**kwargs)
 
         self.num_classes = num_classes
         self.num_frames = num_frames
@@ -23,6 +23,7 @@ class Transformer(Layer):
         self.classifier = None
 
     def build(self, input_shape):    
+        self.temporal_transformer_layers = []
         for _ in range(self.num_transformer_layers):
             attention = MultiHeadAttention(num_heads=self.num_heads, key_dim=self.embed_dims // self.num_heads)
             norm1 = LayerNormalization(epsilon=1e-6)
@@ -39,6 +40,7 @@ class Transformer(Layer):
 
         self.global_pool = tf.keras.layers.GlobalAveragePooling1D()
         self.classifier = Dense(self.num_classes, activation='sigmoid', kernel_initializer='he_normal', dtype='float32')
+        super().build(input_shape)
 
     def call(self, inputs, training=False):
         # inputs shape: [batch_size, num_frames, embed_dims]
@@ -62,4 +64,22 @@ class Transformer(Layer):
         x = self.classifier(x)  # [batch_size, num_classes]
 
         return x
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'num_classes': self.num_classes,
+            'num_frames': self.num_frames,
+            'embed_dims': self.embed_dims,
+            'num_heads': self.num_heads,
+            'ff_dim': self.ff_dim,
+            'num_transformer_layers': self.num_transformer_layers,
+            'dropout_rate': self.dropout_rate,
+            'use_spatial_attention': self.use_spatial_attention
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
     

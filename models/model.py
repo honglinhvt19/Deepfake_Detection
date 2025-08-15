@@ -7,7 +7,7 @@ from .transformer import Transformer
 class ModelBuilder(Model):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
                  ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True):
-        super(ModelBuilder, self).__init__()
+        super(ModelBuilder, self).__init__(**kwargs)
         self.num_classes = num_classes
         self.num_frames = num_frames
         self.embed_dims = embed_dims
@@ -41,4 +41,22 @@ class ModelBuilder(Model):
         inputs = tf.keras.Input(shape=(self.num_frames, 224, 224, 3), name='input_videos')
         outputs = self.call(inputs)
         return Model(inputs=inputs, outputs=outputs, name='DeepfakeDetectionModel')
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'num_classes': self.num_classes,
+            'num_frames': self.num_frames,
+            'embed_dims': self.embed_dims,
+            'num_heads': self.num_heads,
+            'ff_dim': self.ff_dim,
+            'num_transformer_layers': self.num_transformer_layers,
+            'dropout_rate': self.dropout_rate,
+            'use_spatial_attention': self.use_spatial_attention
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 

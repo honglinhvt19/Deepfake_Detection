@@ -2,12 +2,16 @@ import yaml
 import os
 import math
 from data.dataset import Dataset
-from models.model import ModelBuilder
 from utils.checkpoint import create_checkpoint_callback, load_checkpoint
 from utils.logger import Logger
 import tensorflow as tf
 from .optimizer import get_optimizer, set_submodel_trainable
+from models.xception import Xception, block
 from models.efficientnet import EfficientNet
+from models.feature_extractor import FeatureExtractor
+from models.fusion import Fusion
+from models.transformer import Transformer
+from models.model import ModelBuilder
 
 def train(config_path, resume_from_checkpoint=False):
     # Đọc cấu hình
@@ -56,6 +60,11 @@ def train(config_path, resume_from_checkpoint=False):
         use_spatial_attention=config['model']['use_spatial_attention']
     )
     model = model_builder.create_model()
+
+    print("Running GPU warmup...")
+    for batch in train_dataset.take(1):
+        model(batch[0], training=True)
+    print("GPU warmup completed.")
 
     initial_epoch = 0
     if resume_from_checkpoint:
@@ -117,7 +126,7 @@ def train(config_path, resume_from_checkpoint=False):
     opt_ft = get_optimizer(optimizer_name, fine_tune_lr)
     model.compile(optimizer=opt_ft, loss=config['training']['loss'], metrics=config['training']['metrics'])
     
-    remaining_epochs = total_epochs - epochs_phase1
+    remaining_epochs = total_epochs - max(epochs_phase1, initial_epoch)
     if remaining_epochs > 0:
         print(f"--- Phase 2: fine-tune {remaining_epochs} epoch (LR={fine_tune_lr}) ---")
         history_phase2 = model.fit(
