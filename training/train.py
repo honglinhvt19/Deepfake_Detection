@@ -5,7 +5,7 @@ from data.dataset import Dataset
 from utils.checkpoint import create_checkpoint_callback, load_checkpoint
 from utils.logger import Logger
 import tensorflow as tf
-from .optimizer import get_optimizer, set_submodel_trainable
+from training.optimizer import get_optimizer, set_submodel_trainable
 from models.xception import Xception, block
 from models.efficientnet import EfficientNet
 from models.feature_extractor import FeatureExtractor
