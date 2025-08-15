@@ -3,7 +3,8 @@ import os
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
-    checkpoint_path = os.path.join(checkpoint_dir, "model_{epoch:02d}_{val_loss:.4f}.h5")
+    checkpoint_path = os.path.join(checkpoint_dir, "model_{epoch:02d}_{val_loss:.4f}.keras")
+    print(f"Saving checkpoints to: {checkpoint_dir}")
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         checkpoint_path,
         monitor=monitor,
