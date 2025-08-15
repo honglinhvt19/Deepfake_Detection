@@ -1,5 +1,6 @@
 import tensorflow as tf
 import os
+import re
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -16,9 +17,33 @@ def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     return checkpoint_callback
 
 def load_checkpoint(model, checkpoint_path):
-    if os.path.exists(checkpoint_path):
-        model.load_weights(checkpoint_path)
-        print(f"Loaded weights from {checkpoint_path}")
+    if not os.path.exists(checkpoint_path):
+        print(f"Can't find checkpoint at {checkpoint_path}")
+        return model, 0
+    
+    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras')]
+    if not checkpoint_files:
+        print(f"Can't find checkpoint in {checkpoint_path}")
+        return model, 0
+    
+    latest_checkpoint = None
+    latest_epoch = -1
+    for f in checkpoint_files:
+        match = re.match(r"model_(\d+)_[\d.]+.keras", f)
+        if match:
+            epoch = int(match.group(1))
+            if epoch > latest_epoch:
+                latest_epoch = epoch
+                latest_checkpoint = os.path.join(checkpoint_path, f)
+
+    if latest_checkpoint:
+        try:
+            model.load_weights(latest_checkpoint)
+            print(f"Load weight from {latest_checkpoint} at epoch {latest_epoch}")
+            return model, latest_epoch
+        except Exception as e:
+            print(f"Error: Can't load checkpoint {latest_checkpoint}: {e}")
+            return model, 0
     else:
-        print(f"No checkpoint found at {checkpoint_path}")
-    return model
+        print(f"Can't find checkpoint in {checkpoint_path}")
+        return model, 0

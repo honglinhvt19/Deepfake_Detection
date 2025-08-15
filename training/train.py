@@ -3,13 +3,13 @@ import os
 import math
 from data.dataset import Dataset
 from models.model import ModelBuilder
-from utils.checkpoint import create_checkpoint_callback
+from utils.checkpoint import create_checkpoint_callback, load_checkpoint
 from utils.logger import Logger
 import tensorflow as tf
 from .optimizer import get_optimizer, set_submodel_trainable
 from models.efficientnet import EfficientNet
 
-def train(config_path):
+def train(config_path, resume_from_checkpoint=False):
     # Đọc cấu hình
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
@@ -57,11 +57,10 @@ def train(config_path):
     )
     model = model_builder.create_model()
 
-    # Warmup GPU
-    print("Running GPU warmup...")
-    for batch in train_dataset.take(1):
-        model(batch[0], training=True)  
-    print("GPU warmup completed.")
+    initial_epoch = 0
+    if resume_from_checkpoint:
+        model, initial_epoch = load_checkpoint(model, config['training']['checkpoint_dir'])
+        print(f"Tiếp tục huấn luyện từ epoch {initial_epoch}")
     
     found = set_submodel_trainable(model, EfficientNet, False)
     if not found:
@@ -79,20 +78,33 @@ def train(config_path):
 
     history_phase1 = None
     epochs_phase1 = min(freeze_epochs, total_epochs)
-    if epochs_phase1 > 0:
-        print(f"--- Phase 1: train {epochs_phase1} epoch (EfficientNet frozen) ---")
+    if initial_epoch < epochs_phase1:
+        found = set_submodel_trainable(model, EfficientNet, False)
+        if not found:
+            print("Error:Can't find EfficientNet to freeze.")
+            return None
+        else:
+            print(f"EfficientNet has been frozen from epoch {initial_epoch + 1} to {epochs_phase1}.")
+        
+        opt = get_optimizer(optimizer_name, base_lr)
+        model.compile(optimizer=opt, loss=config['training']['loss'], metrics=config['training']['metrics'])
+        
+        print(f"--- Phase 1: Train {epochs_phase1 - initial_epoch} epoch (Freezing EfficientNet) ---")
         history_phase1 = model.fit(
             train_dataset,
             validation_data=val_dataset,
             epochs=epochs_phase1,
+            initial_epoch=initial_epoch,
             steps_per_epoch=steps_per_epoch,
             validation_steps=val_steps,
             callbacks=[checkpoint_callback, logger],
             verbose=1
         )
+    else:
+        print("Pass phase 1: Trained more than freeze_epochs.")
 
     history_phase2 = None   
-    if freeze_epochs >= total_epochs:
+    if initial_epoch >= total_epochs:
         print("Training completed in Phase 1, no fine-tuning needed.")
         return history_phase1, model
 
@@ -106,20 +118,23 @@ def train(config_path):
     model.compile(optimizer=opt_ft, loss=config['training']['loss'], metrics=config['training']['metrics'])
     
     remaining_epochs = total_epochs - epochs_phase1
-    print(f"--- Phase 2: fine-tune {remaining_epochs} epoch (LR={fine_tune_lr}) ---")
-    history_phase2 = model.fit(
-        train_dataset,
-        validation_data=val_dataset,
-        epochs=total_epochs, 
-        initial_epoch=epochs_phase1,
-        steps_per_epoch=steps_per_epoch,
-        validation_steps=val_steps,
-        callbacks=[checkpoint_callback, logger],
-        verbose=1
-    )
+    if remaining_epochs > 0:
+        print(f"--- Phase 2: fine-tune {remaining_epochs} epoch (LR={fine_tune_lr}) ---")
+        history_phase2 = model.fit(
+            train_dataset,
+            validation_data=val_dataset,
+            epochs=total_epochs, 
+            initial_epoch=max(initial_epoch, epochs_phase1),
+            steps_per_epoch=steps_per_epoch,
+            validation_steps=val_steps,
+            callbacks=[checkpoint_callback, logger],
+            verbose=1
+        )
+    else:
+        print("Pass phase 2: Not enough epochs to train.")
     
     return (history_phase1, history_phase2), model
 
 if __name__ == "__main__":
     config_path = "./configs/config.yaml"
-    history, model = train(config_path)
+    history, model = train(config_path, resume_from_checkpoint=True)
