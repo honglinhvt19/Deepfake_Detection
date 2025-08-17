@@ -4,8 +4,8 @@ from .xception import Xception
 from .efficientnet import EfficientNet
 
 class FeatureExtractor(Layer):
-    def __init__(self, num_classes=1000, pretrained=True):
-        super(FeatureExtractor, self).__init__()
+    def __init__(self, num_classes=1000, pretrained=True, **kwargs):
+        super(FeatureExtractor, self).__init__(**kwargs)
         self.num_classes = num_classes
         self.pretrained = pretrained
         self.xception = None

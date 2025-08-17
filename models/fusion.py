@@ -3,8 +3,8 @@ from keras.layers import Concatenate, Dense, BatchNormalization, Layer
 from .feature_extractor import FeatureExtractor
 
 class Fusion(Layer):
-    def __init__(self, embed_dims=512):
-        super(Fusion, self).__init__()
+    def __init__(self, embed_dims=512, **kwargs):
+        super(Fusion, self).__init__(**kwargs)
         self.embed_dims = embed_dims
         self.embed_dims = embed_dims
         self.concatenate = None
