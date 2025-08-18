@@ -23,5 +23,5 @@ training:
   optimizer: "adam"
   loss: "binary_crossentropy"
   metrics: ["accuracy"]
-  checkpoint_dir: "/kaggle/input/checkpoints"
+  checkpoint_dir: "./checkpoints"
   log_dir: "./logs"
