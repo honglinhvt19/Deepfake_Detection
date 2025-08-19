@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow import keras
+import keras
 from keras.layers import Layer, GlobalAveragePooling2D
 from keras.applications import EfficientNetB0, Xception
 
