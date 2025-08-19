@@ -14,12 +14,8 @@ class Fusion(Layer):
     def build(self, input_shape):
         d1 = input_shape[0][-1]
         d2 = input_shape[1][-1]
-        in_dim = d1 + d2
 
-        self.feature_projection = Dense(
-            self.embed_dims,
-            name="feature_projection"
-        )
+        self.proj = Dense(self.embed_dims, name="feature_projection")
         super().build(input_shape)
 
     def call(self, inputs, training=False):
