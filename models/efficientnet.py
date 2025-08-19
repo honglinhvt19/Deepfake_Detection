@@ -1,4 +1,5 @@
 import tensorflow as tf
+import keras
 from keras.layers import GlobalAveragePooling2D, Dense, BatchNormalization, Input
 from keras.models import Model
 from keras.applications import EfficientNetB0
@@ -9,6 +10,7 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+@keras.saving.register_keras_serializable(package="Custom")
 class EfficientNet(Model):
     def __init__(self, num_classes=1000, freeze_layers=100, pretrained=True, **kwargs):
         super(EfficientNet, self).__init__(**kwargs)

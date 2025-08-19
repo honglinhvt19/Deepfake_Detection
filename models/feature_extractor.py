@@ -1,8 +1,10 @@
 import tensorflow as tf
+import keras
 from keras.layers import Input, Layer
 from .xception import Xception
 from .efficientnet import EfficientNet
 
+@keras.saving.register_keras_serializable(package="Custom")
 class FeatureExtractor(Layer):
     def __init__(self, num_classes=1000, pretrained=True, **kwargs):
         super(FeatureExtractor, self).__init__(**kwargs)

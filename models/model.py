@@ -1,9 +1,11 @@
 import tensorflow as tf
+import keras
 from keras.models import Model
 from .feature_extractor import FeatureExtractor
 from .fusion import Fusion
 from .transformer import Transformer
 
+@keras.saving.register_keras_serializable(package="Custom")
 class ModelBuilder(Model):
     def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
                 ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True, **kwargs):
