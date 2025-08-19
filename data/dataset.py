@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 import os
 import random
 from .preprocessing import preprocess_video
@@ -32,11 +31,10 @@ class Dataset:
 
         return list(video_paths), list(labels)
 
-
     def _generator(self):
         for video_path, label in zip(self.video_paths, self.labels):
-            video_tensor = preprocess_video(video_path, self.num_frames, self.frame_size)
-            yield video_tensor, tf.cast(label, tf.int32)
+            frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
+            yield frames, tf.cast(label, tf.int32)
 
     def as_dataset(self):
         output_signature = (
@@ -44,7 +42,7 @@ class Dataset:
             tf.TensorSpec(shape=(), dtype=tf.int32)
         )
         dataset = tf.data.Dataset.from_generator(self._generator, output_signature=output_signature)
-        dataset = dataset.repeat()
         if self.training:
             dataset = dataset.shuffle(len(self.video_paths), reshuffle_each_iteration=True)
-        return dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        return dataset

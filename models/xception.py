@@ -5,7 +5,6 @@ from keras.models import Model
 from keras.initializers import RandomNormal, Constant
 import math
 
-@keras.saving.register_keras_serializable(package="Custom")
 class block(Model):
     def __init__(self, in_filters, out_filters, reps, strides=1, start_with_relu=True, grow_first=True, **kwargs):
         super(block, self).__init__(**kwargs)

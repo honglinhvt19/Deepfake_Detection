@@ -1,7 +1,14 @@
 import tensorflow as tf
 import os
 import re
+from keras.utils import custom_object_scope
 from keras.models import load_model
+from models.feature_extractor import FeatureExtractor
+from models.fusion import Fusion
+from models.transformer import Transformer
+from models.model import ModelBuilder
+from models.xception import Xception, block
+from models.efficientnet import EfficientNet
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -39,17 +46,20 @@ def load_checkpoint(model, checkpoint_path):
 
     if latest_checkpoint:
         try:
-            custom_objects = {}
-            for obj in getattr(model, "submodules", []):
-                if isinstance(obj, (tf.keras.layers.Layer, tf.keras.Model)):
-                    cls = obj.__class__
-                    mod = getattr(cls, "__module__", "")
-                    if not (mod.startswith("keras") or mod.startswith("tensorflow") or mod.startswith("tf_keras")):
-                        custom_objects[cls.__name__] = cls
-
-            loaded_model = load_model(latest_checkpoint, custom_objects=custom_objects)
-            print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch}")
-            return loaded_model, latest_epoch
+            custom_objects = {
+                "FeatureExtractor": FeatureExtractor,
+                "Fusion": Fusion,
+                "Transformer": Transformer,
+                "ModelBuilder": ModelBuilder,
+                "Xception": Xception,
+                "EfficientNet": EfficientNet,
+                "block": block,
+            }
+                
+            with custom_object_scope(custom_objects):
+                loaded_model = load_model(latest_checkpoint)
+                print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch}")
+                return loaded_model, latest_epoch
         except Exception as e:
             print(f"Error: Can't load model {latest_checkpoint}: {e}")
             return model, 0

@@ -3,7 +3,6 @@ import keras
 from keras.layers import Concatenate, Dense, BatchNormalization, Layer
 from .feature_extractor import FeatureExtractor
 
-@keras.saving.register_keras_serializable(package="Custom")
 class Fusion(Layer):
     def __init__(self, embed_dims=512, **kwargs):
         super(Fusion, self).__init__(**kwargs)
