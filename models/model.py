@@ -26,7 +26,7 @@ class ModelBuilder(Model):
         ]
 
         self.cls_token = self.add_weight(
-            "cls_token",
+            name="cls_token",
             shape=[1, 1, embed_dims],
             initializer="zeros",
             trainable=True
