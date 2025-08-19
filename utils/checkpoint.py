@@ -29,7 +29,7 @@ def load_checkpoint(model, checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
         return model, 0
     
-    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.h5')]
+    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras') or f.endswith('.h5')]
     if not checkpoint_files:
         print(f"Can't find checkpoint in {checkpoint_path}")
         return model, 0
@@ -55,9 +55,9 @@ def load_checkpoint(model, checkpoint_path):
                 "EfficientNet": EfficientNet,
                 "block": block,
             }
-                
+
             with custom_object_scope(custom_objects):
-                loaded_model = load_model(latest_checkpoint)
+                loaded_model = load_model(latest_checkpoint, custom_objects=custom_objects)
                 print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch}")
                 return loaded_model, latest_epoch
         except Exception as e:
