@@ -25,13 +25,7 @@ class ModelBuilder(Model):
             for _ in range(num_transformer_layers)
         ]
 
-        self.cls_token = self.add_weight(
-            (1, 1, embed_dims),
-            initializer=tf.keras.initializers.Zeros(),
-            trainable=True,
-            name='cls_token',
-        )
-
+        self.pooling = keras.layers.GlobalAveragePooling1D()
         self.dropout = keras.layers.Dropout(dropout_rate)
 
         self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid")
@@ -40,17 +34,15 @@ class ModelBuilder(Model):
         xcep_feat, eff_feat = self.feature_extractor(inputs, training=training)
         fused = self.fusion([xcep_feat, eff_feat], training=training)
 
-        batch_size = tf.shape(fused)[0]
-        cls_tokens = tf.repeat(self.cls_token, repeats=batch_size, axis=0)
-        x = tf.concat([cls_tokens, fused], axis=1)
+        x = fused
         for layer in self.transformer_layers:
             x = layer(x, training=training)
 
-        cls_embeded = x[:, 0]
-        cls_embeded = self.dropout(cls_embeded, training=training)
-        cls_embeded = self.fc(cls_embeded)
+        x = self.pooling(x)
+        x = self.dropout(x, training=training)
+        x = self.fc(x)
 
-        return cls_embeded
+        return x
 
     def create_model(self):
         inputs = keras.Input(shape=(self.num_frames, 224, 224, 3))
