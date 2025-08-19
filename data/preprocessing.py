@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-def extracts_frames(video_path, num_frames = 8, frame_size = (224, 224)):
+def extracts_frames(video_path, num_frames=8, frame_size=(224, 224)):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if total_frames == 0:
         cap.release()
-        return None
+        return np.zeros((num_frames, *frame_size, 3), dtype=np.uint8)
     
     frame_indices = np.linspace(0, total_frames - 1, num_frames, dtype=int)
     frames = []
@@ -35,35 +35,27 @@ def extracts_frames(video_path, num_frames = 8, frame_size = (224, 224)):
     while len(frames) < num_frames:
         frames.append(frames[-1] if frames else np.zeros((frame_size[0], frame_size[1], 3), dtype=np.uint8))
 
-    return np.array(frames)[:num_frames] #[num_frames, 224, 224, 3]
-
-def preprocess_frame(frame, normalize = True):
-    frame = frame.astype(np.float32)
-    if normalize:
-        frame = frame / 255.0 #[0, 1]
-    return frame
+    return np.array(frames, dtype=np.uint8)[:num_frames]  # numpy, uint8
 
 def augment_frame(frame):
-    if np.random.rand() > 0.5:
+    if tf.random.uniform([]) > 0.5:
         frame = tf.image.flip_left_right(frame)
-    frame = tf.image.rot90(frame, k=np.random.randint(0, 2))
+    frame = tf.image.rot90(frame, k=tf.random.uniform([], 0, 2, dtype=tf.int32))
     frame = tf.image.random_brightness(frame, max_delta=0.1)
-    frame  = tf.image.random_contrast(frame, lower=0.9, upper=1.1)
+    frame = tf.image.random_contrast(frame, lower=0.9, upper=1.1)
     return frame
 
+
 def preprocess_video(video_path, num_frames=8, frame_size=(224, 224), training=False, normalize=True):
-    frames = extracts_frames(video_path, num_frames, frame_size)
+    frames = extracts_frames(video_path, num_frames, frame_size)  # numpy uint8
     if frames is None:
-        return None
+        frames = np.zeros((num_frames, *frame_size, 3), dtype=np.uint8)
 
-    processed_frames = []
-    for frame in frames:
-        frame = preprocess_frame(frame, normalize=normalize)
-        if training:
-            frame = augment_frame(frame)
-        processed_frames.append(frame)
-    
-    frames = np.array(processed_frames, dtype=np.float32)  # [num_frames, 224, 224, 3]
+    frames = tf.convert_to_tensor(frames, dtype=tf.float32)
+    if normalize:
+        frames = frames / 255.0
 
-    return frames
-    
+    if training:
+        frames = tf.map_fn(augment_frame, frames)
+
+    return frames  # [num_frames, H, W, 3] Tensor
