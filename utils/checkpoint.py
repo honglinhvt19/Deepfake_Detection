@@ -1,7 +1,7 @@
 import tensorflow as tf
 import os
 import re
-from keras.utils import custom_object_scope
+from keras.saving import custom_object_scope
 from keras.models import load_model
 from models.feature_extractor import FeatureExtractor
 from models.fusion import Fusion
