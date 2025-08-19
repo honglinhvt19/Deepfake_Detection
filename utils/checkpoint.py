@@ -3,12 +3,11 @@ import os
 import re
 from keras.saving import custom_object_scope
 from keras.models import load_model
+
 from models.feature_extractor import FeatureExtractor
 from models.fusion import Fusion
 from models.transformer import Transformer
 from models.model import ModelBuilder
-from models.xception import Xception, block
-from models.efficientnet import EfficientNet
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -29,7 +28,7 @@ def load_checkpoint(model, checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
         return model, 0
     
-    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras') or f.endswith('.h5')]
+    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.h5')]
     if not checkpoint_files:
         print(f"Can't find checkpoint in {checkpoint_path}")
         return model, 0
@@ -50,10 +49,7 @@ def load_checkpoint(model, checkpoint_path):
                 "FeatureExtractor": FeatureExtractor,
                 "Fusion": Fusion,
                 "Transformer": Transformer,
-                "ModelBuilder": ModelBuilder,
-                "Xception": Xception,
-                "EfficientNet": EfficientNet,
-                "block": block,
+                "ModelBuilder": ModelBuilder
             }
 
             with custom_object_scope(custom_objects):

@@ -1,63 +1,57 @@
 import tensorflow as tf
 import keras
 from keras.models import Model
-from .feature_extractor import FeatureExtractor
-from .fusion import Fusion
-from .transformer import Transformer
+from models.feature_extractor import FeatureExtractor
+from models.fusion import Fusion
+from models.transformer import Transformer
 
 class ModelBuilder(Model):
-    def __init__(self, num_classes=1, num_frames=4, embed_dims=256, num_heads=8,
-                ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True, **kwargs):
+    def __init__(self, num_classes=1, num_frames=8, embed_dims=256, num_heads=8,
+                 ff_dim=1024, num_transformer_layers=3, dropout_rate=0.1, use_spatial_attention=True,
+                 freeze_ratio=1.0, **kwargs):
         super().__init__(**kwargs)
         self.num_classes = num_classes
         self.num_frames = num_frames
-        self.embed_dims = embed_dims
-        self.num_heads = num_heads
-        self.ff_dim = ff_dim
-        self.num_transformer_layers = num_transformer_layers
-        self.dropout_rate = dropout_rate
-        self.use_spatial_attention = use_spatial_attention
+        self.use_spartial_attention = use_spatial_attention
 
-        self.feature_extractor = FeatureExtractor()
-        self.fusion = Fusion(embed_dims=self.embed_dims)
-        self.transformer = Transformer(
-            num_classes=self.num_classes,
-            num_frames=self.num_frames,
-            embed_dims=self.embed_dims,
-            num_heads=self.num_heads,
-            ff_dim=self.ff_dim,
-            num_transformer_layers=self.num_transformer_layers,
-            dropout_rate=self.dropout_rate,
-            use_spatial_attention=self.use_spatial_attention
+        self.feature_extractor = FeatureExtractor(freeze_ratio=freeze_ratio)
+        self.fusion = Fusion(embed_dims=embed_dims)
+
+        self.transformer_layers = [
+            Transformer(embed_dims//num_heads,
+                        num_heads, ff_dim,
+                        dropout=dropout_rate,
+                        use_spatial_attention=use_spatial_attention)
+            for _ in range(num_transformer_layers)
+        ]
+
+        self.cls_token = self.add_weight(
+            "cls_token",
+            shape=[1, 1, embed_dims],
+            initializer="zeros",
+            trainable=True
         )
+        self.dropout = keras.layers.Dropout(dropout_rate)
 
-    def call(self, inputs, training=None):
-        xception_features, efficientnet_features = self.feature_extractor(inputs, training=training)
-        fusion_features = self.fusion([xception_features, efficientnet_features], training=training)
-        outputs = self.transformer(fusion_features, training=training)
+        self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid")
 
-        return outputs
-    
+    def call(self, inputs, training=False):
+        xcep_feat, eff_feat = self.feature_extractor(inputs, training=training)
+        fused = self.fusion([xcep_feat, eff_feat], training=training)
+
+        batch_size = tf.shape(fused)[0]
+        cls_tokens = tf.repeat(self.cls_token, repeats=batch_size, axis=0)
+        x = tf.concat([cls_tokens, fused], axis=1)
+        for layer in self.transformer_layers:
+            x = layer(x, training=training)
+
+        cls_embeded = x[:, 0]
+        cls_embeded = self.dropout(cls_embeded, training=training)
+        cls_embeded = self.fc(cls_embeded)
+
+        return cls_embeded
+
     def create_model(self):
-        inputs = tf.keras.Input(shape=(self.num_frames, 224, 224, 3), name='input_videos')
+        inputs = keras.Input(shape=(self.num_frames, 224, 224, 3))
         outputs = self.call(inputs)
-        return Model(inputs=inputs, outputs=outputs, name='DeepfakeDetectionModel')
-    
-    def get_config(self):
-        config = super().get_config()
-        config.update({
-            'num_classes': self.num_classes,
-            'num_frames': self.num_frames,
-            'embed_dims': self.embed_dims,
-            'num_heads': self.num_heads,
-            'ff_dim': self.ff_dim,
-            'num_transformer_layers': self.num_transformer_layers,
-            'dropout_rate': self.dropout_rate,
-            'use_spatial_attention': self.use_spatial_attention
-        })
-        return config
-
-    @classmethod
-    def from_config(cls, config):
-        return cls(**config)
-
+        return Model(inputs=inputs, outputs=outputs, name="DeepfakeDetectionModel")
