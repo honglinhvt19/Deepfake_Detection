@@ -12,10 +12,24 @@ class Fusion(Layer):
         self.feature_projection = None
 
     def build(self, input_shape):
+        if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 2:
+            raise ValueError(f"Expected 2 inputs, got {len(input_shape) if isinstance(input_shape, (list, tuple)) else 1}")
+
         d1 = input_shape[0][-1]
         d2 = input_shape[1][-1]
 
-        self.proj = Dense(self.embed_dims, name="feature_projection")
+        if d1 is None or d2 is None:
+            raise ValueError(f"Input dimensions must be fully defined. Got d1={d1}, d2={d2}")
+
+        total_dims = d1 + d2
+        self.feature_projection = Dense(self.embed_dims, name="feature_projection")
+
+        projection_input_shape = (input_shape[0][0], input_shape[0][1], total_dims)
+        self.feature_projection.build(projection_input_shape)
+
+        bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
+        self.bn_projection.build(bn_input_shape)
+
         super().build(input_shape)
 
     def call(self, inputs, training=False):
@@ -36,4 +50,4 @@ class Fusion(Layer):
     @classmethod
     def from_config(cls, config):
         return cls(**config)
-    
+
