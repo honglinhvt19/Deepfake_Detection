@@ -32,8 +32,8 @@ class FeatureExtractor(keras.layers.Layer):
 
         x = tf.reshape(inputs, (-1, shape[2], shape[3], 3))
 
-        x_xcep = tf.image.resize(x, (299, 299), method=tf.image.ResizeMethod.LANCZOS3)
-        x_eff = tf.image.resize(x, (224, 224), method=tf.image.ResizeMethod.LANCZOS3)
+        x_xcep = tf.image.resize(x, (299, 299), method=tf.image.ResizeMethod.BICUBIC)
+        x_eff = tf.image.resize(x, (224, 224), method=tf.image.ResizeMethod.BICUBIC)
 
         xcep = self.xcep_backbone(x_xcep, training=training)
         eff  = self.eff_backbone(x_eff, training=training)
