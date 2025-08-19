@@ -30,7 +30,7 @@ def load_checkpoint(model, checkpoint_path):
     latest_checkpoint = None
     latest_epoch = -1
     for f in checkpoint_files:
-        match = re.match(r"model_(\d+)_[\d.]+.weights.h5", f)
+        match = re.match(r"model_(\d+)_[\d.]+.h5", f)
         if match:
             epoch = int(match.group(1))
             if epoch > latest_epoch:
