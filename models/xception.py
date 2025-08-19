@@ -1,11 +1,11 @@
 import tensorflow as tf
 import keras
-from keras.layers import SeparableConv2D, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Add, BatchNormalization, Input, Dense
-from keras.models import Model
+from keras.layers import SeparableConv2D, Conv2D, MaxPooling2D, GlobalAveragePooling2D, ReLU, Add, BatchNormalization, Input, Dense, Layer
 from keras.initializers import RandomNormal, Constant
 import math
 
-class block(Model):
+@keras.saving.register_keras_serializable(package="Custom")
+class block(Layer):
     def __init__(self, in_filters, out_filters, reps, strides=1, start_with_relu=True, grow_first=True, **kwargs):
         super(block, self).__init__(**kwargs)
         self.in_filters = in_filters
@@ -89,7 +89,8 @@ class block(Model):
         x = Add()([x, skip])
         return x
     
-class Xception(Model):
+@keras.saving.register_keras_serializable(package="Custom")
+class Xception(Layer):
     def __init__(self, num_classes=1000):
         super(Xception, self).__init__()
         self.num_classes = num_classes
