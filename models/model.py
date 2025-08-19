@@ -26,9 +26,9 @@ class ModelBuilder(Model):
         ]
 
         self.cls_token = self.add_weight(
+            name='cls_token',
             shape=(1, 1, embed_dims),
             initializer=tf.keras.initializers.Zeros(),
-            dtype=tf.float32,
             trainable=True
         )
 
