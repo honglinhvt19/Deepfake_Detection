@@ -10,7 +10,7 @@ def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         checkpoint_path,
         monitor=monitor,
-        save_best_only=True,
+        save_best_only=False,
         mode=mode,
         save_weights_only=False,
         verbose=1
