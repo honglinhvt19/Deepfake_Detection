@@ -9,7 +9,7 @@ class FeatureExtractor(keras.layers.Layer):
 
         self.xcep_backbone = keras.applications.Xception(
             include_top=False, weights="imagenet", pooling="avg",
-            input_shape=(244,244,3)
+            input_shape=(299,299,3)
         )
 
         self.eff_backbone = keras.applications.EfficientNetB0(
@@ -30,10 +30,13 @@ class FeatureExtractor(keras.layers.Layer):
         shape = tf.shape(inputs)
         b, t = shape[0], shape[1]
 
-        x = tf.reshape(inputs, (-1, 224, 224, 3))
+        x = tf.reshape(inputs, (-1, shape[2], shape[3], 3))
 
-        xcep = self.xcep_backbone(x, training=training)
-        eff  = self.eff_backbone(x,  training=training)
+        x_xcep = tf.image.resize(x, (299, 299), method=tf.image.ResizeMethod.LANCZOS3)
+        x_eff = tf.image.resize(x, (224, 224), method=tf.image.ResizeMethod.LANCZOS3)
+
+        xcep = self.xcep_backbone(x_xcep, training=training)
+        eff  = self.eff_backbone(x_eff, training=training)
 
         xcep = tf.reshape(xcep, (b, t, xcep.shape[-1]))
         eff  = tf.reshape(eff,  (b, t, eff.shape[-1]))
