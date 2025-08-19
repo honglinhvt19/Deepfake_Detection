@@ -27,7 +27,8 @@ class ModelBuilder(Model):
 
         self.cls_token = self.add_weight(
             shape=(1, 1, embed_dims),
-            initializer="zeros",
+            dtype=tf.float32,
+            initializer=keras.initializers.Zeros(),
             trainable=True
         )
         self.dropout = keras.layers.Dropout(dropout_rate)
