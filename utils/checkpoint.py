@@ -11,7 +11,7 @@ from models.model import ModelBuilder
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
-    checkpoint_path = os.path.join(checkpoint_dir, "model_{epoch:02d}_{val_loss:.4f}.h5")
+    checkpoint_path = os.path.join(checkpoint_dir, "model_{epoch:02d}.keras")
     print(f"Saving checkpoints to: {checkpoint_dir}")
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         checkpoint_path,
@@ -28,7 +28,7 @@ def load_checkpoint(model, checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
         return model, 0
     
-    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.h5')]
+    checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras')]
     if not checkpoint_files:
         print(f"Can't find checkpoint in {checkpoint_path}")
         return model, 0
@@ -36,7 +36,7 @@ def load_checkpoint(model, checkpoint_path):
     latest_checkpoint = None
     latest_epoch = -1
     for f in checkpoint_files:
-        match = re.match(r"model_(\d+)_[\d.]+.h5", f)
+        match = re.match(r"model_(\d+)+.keras", f)
         if match:
             epoch = int(match.group(1))
             if epoch > latest_epoch:
