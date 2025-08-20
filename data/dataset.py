@@ -33,8 +33,11 @@ class Dataset:
 
     def _generator(self):
         for video_path, label in zip(self.video_paths, self.labels):
-            frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
-            yield frames, tf.cast(label, tf.int32)
+            try:
+                frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
+                yield frames, tf.cast(label, tf.int32)
+            except Exception as e:
+                continue
 
     def as_dataset(self):
         output_signature = (

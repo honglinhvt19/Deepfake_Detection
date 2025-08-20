@@ -47,9 +47,9 @@ def augment_frame(frame):
 
 
 def preprocess_video(video_path, num_frames=8, frame_size=(224, 224), training=False, normalize=True):
-    frames = extracts_frames(video_path, num_frames, frame_size)  # numpy uint8
+    frames = extracts_frames(video_path, num_frames, frame_size) 
     if frames is None:
-        frames = np.zeros((num_frames, *frame_size, 3), dtype=np.uint8)
+        return np.zeros((num_frames, *frame_size, 3), dtype=tf.float32)
 
     frames = tf.convert_to_tensor(frames, dtype=tf.float32)
     if normalize:
