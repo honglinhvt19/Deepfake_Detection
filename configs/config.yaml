@@ -6,11 +6,11 @@ model:
   ff_dim: 2048
   num_transformer_layers: 6 # number of transformer layers
   dropout_rate: 0.3 #spatial dropout rate
-  use_spatial_attention: true
+  use_spatial_attention: false # whether to use spatial attention
 
 data:
   data_dir: "/kaggle/input/celeb-df/dataset"
-  batch_size: 16
+  batch_size: 12
   num_frames: 16
   frame_size: [224, 224]
   normalize: true
