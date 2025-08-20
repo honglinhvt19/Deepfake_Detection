@@ -6,6 +6,10 @@ from keras.layers import Layer, MultiHeadAttention, Dropout, LayerNormalization,
 class Transformer(Layer):
     def __init__(self, head_size, num_heads, ff_dim, dropout=0.1, use_spatial_attention=True, **kwargs):
         super().__init__(**kwargs)
+        self.head_size = head_size
+        self.num_heads = num_heads
+        self.ff_dim = ff_dim
+        self.dropout = dropout
         self.use_spatial_attention = use_spatial_attention
         self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
         self.dropout1 = Dropout(dropout)
