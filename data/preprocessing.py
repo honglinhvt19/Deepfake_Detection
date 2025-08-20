@@ -11,7 +11,7 @@ def extracts_frames(video_path, num_frames=8):
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if total_frames == 0:
         cap.release()
-        return np.zeros((num_frames, 224, 224, 3), dtype=np.uint8)  # dummy frame
+        return np.zeros((num_frames, 224, 224, 3), dtype=np.uint8)
     
     frame_indices = np.linspace(0, total_frames - 1, num_frames, dtype=int)
     frames = []

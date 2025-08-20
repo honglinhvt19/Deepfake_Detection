@@ -48,6 +48,6 @@ class Dataset:
         if self.training:
             dataset = dataset.shuffle(len(self.video_paths), reshuffle_each_iteration=True)
             dataset = dataset.repeat()
-        
+
         dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return dataset
