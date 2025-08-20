@@ -44,5 +44,7 @@ class Dataset:
         dataset = tf.data.Dataset.from_generator(self._generator, output_signature=output_signature)
         if self.training:
             dataset = dataset.shuffle(len(self.video_paths), reshuffle_each_iteration=True)
+            dataset = dataset.repeat()
+        
         dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return dataset
