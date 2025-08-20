@@ -1,13 +1,17 @@
 import cv2
 import numpy as np
 import tensorflow as tf
+from mtcnn import MTCNN
 
-def extracts_frames(video_path, num_frames=8, frame_size=(224, 224)):
+# Khởi tạo detector một lần
+detector = MTCNN()
+
+def extracts_frames(video_path, num_frames=8):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if total_frames == 0:
         cap.release()
-        return np.zeros((num_frames, *frame_size, 3), dtype=np.uint8)
+        return np.zeros((num_frames, 224, 224, 3), dtype=np.uint8)  # dummy frame
     
     frame_indices = np.linspace(0, total_frames - 1, num_frames, dtype=int)
     frames = []
@@ -17,25 +21,35 @@ def extracts_frames(video_path, num_frames=8, frame_size=(224, 224)):
         ret, frame = cap.read()
         if not ret:
             continue
-        # Đảm bảo frame luôn là 3 kênh RGB
+
+        # Chuẩn hóa sang RGB
         if len(frame.shape) == 2:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
         elif frame.shape[2] == 1:
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
         elif frame.shape[2] == 4:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2RGB)
         else:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, frame_size)
-        frames.append(frame)
+
+        # ---- Crop mặt bằng MTCNN ----
+        faces = detector.detect_faces(frame)
+        if len(faces) > 0:
+            best_face = max(faces, key=lambda d: d['confidence'])
+            x, y, w, h = best_face['box']
+            x, y = max(0, x), max(0, y)
+            face = frame[y:y+h, x:x+w]
+            frames.append(face)
+        else:
+            frames.append(frame)
 
     cap.release()
 
     while len(frames) < num_frames:
-        frames.append(frames[-1] if frames else np.zeros((frame_size[0], frame_size[1], 3), dtype=np.uint8))
+        frames.append(frames[-1] if frames else np.zeros((224, 224, 3), dtype=np.uint8))
 
-    return np.array(frames, dtype=np.uint8)[:num_frames]  # numpy, uint8
+    return np.array(frames, dtype=np.uint8)[:num_frames]
+
 
 def augment_frame(frame):
     if tf.random.uniform([]) > 0.5:
@@ -46,10 +60,8 @@ def augment_frame(frame):
     return frame
 
 
-def preprocess_video(video_path, num_frames=8, frame_size=(224, 224), training=False, normalize=True):
-    frames = extracts_frames(video_path, num_frames, frame_size) 
-    if frames is None:
-        return np.zeros((num_frames, *frame_size, 3), dtype=tf.float32)
+def preprocess_video(video_path, num_frames=8, training=False, normalize=True):
+    frames = extracts_frames(video_path, num_frames)
 
     frames = tf.convert_to_tensor(frames, dtype=tf.float32)
     if normalize:
@@ -58,4 +70,4 @@ def preprocess_video(video_path, num_frames=8, frame_size=(224, 224), training=F
     if training:
         frames = tf.map_fn(augment_frame, frames)
 
-    return frames  # [num_frames, H, W, 3] Tensor
+    return frames   # [num_frames, H, W, 3], chưa resize
