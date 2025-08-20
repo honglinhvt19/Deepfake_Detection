@@ -48,7 +48,11 @@ class Transformer(Layer):
 
     def get_config(self):
         config = super().get_config()
-        config.update({"use_spatial_attention": self.use_spatial_attention})
+        config.update({
+            "head_size": self.head_size,
+            "num_heads": self.num_heads,
+            "ff_dim": self.ff_dim,
+            "use_spatial_attention": self.use_spatial_attention})
         return config
 
     @classmethod
