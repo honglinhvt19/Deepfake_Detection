@@ -28,7 +28,7 @@ class ModelBuilder(Model):
         self.pooling = keras.layers.GlobalAveragePooling1D()
         self.dropout = keras.layers.Dropout(dropout_rate)
 
-        self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid")
+        self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid", dtype='float32',)
 
     def call(self, inputs, training=False):
         xcep_feat, eff_feat = self.feature_extractor(inputs, training=training)

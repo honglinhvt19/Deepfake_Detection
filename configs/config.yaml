@@ -1,25 +1,25 @@
 model:
   num_classes: 1
-  num_frames: 8 # number of frames to process
+  num_frames: 16 # number of frames to process
   embed_dims: 512
   num_heads: 8
-  ff_dim: 1024
+  ff_dim: 2048
   num_transformer_layers: 6 # number of transformer layers
-  dropout_rate: 0.2 #spatial dropout rate
+  dropout_rate: 0.3 #spatial dropout rate
   use_spatial_attention: true
 
 data:
   data_dir: "/kaggle/input/celeb-df/dataset"
-  batch_size: 8
-  num_frames: 8
+  batch_size: 16
+  num_frames: 16
   frame_size: [224, 224]
   normalize: true
 
 training:
-  epochs: 50
+  epochs: 80
   learning_rate: 0.001
   fine-tune_lr: 0.00001
-  freeze_epochs: 40
+  freeze_epochs: 10
   optimizer: "adam"
   loss: "binary_crossentropy"
   metrics: ["accuracy"]
