@@ -6,7 +6,7 @@ from mtcnn import MTCNN
 # Khởi tạo detector một lần
 detector = MTCNN()
 
-def extracts_frames(video_path, num_frames=8):
+def extracts_frames(video_path, num_frames=8, target_size=(224, 224)):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if total_frames == 0:
@@ -37,11 +37,20 @@ def extracts_frames(video_path, num_frames=8):
         if len(faces) > 0:
             best_face = max(faces, key=lambda d: d['confidence'])
             x, y, w, h = best_face['box']
+
+            # clamp to frame boundaries
             x, y = max(0, x), max(0, y)
-            face = frame[y:y+h, x:x+w]
-            frames.append(face)
+            x2, y2 = min(frame.shape[1], x + w), min(frame.shape[0], y + h)
+
+            if x2 > x and y2 > y:
+                face = frame[y:y2, x:x2]
+            else:
+                face = frame 
         else:
-            frames.append(frame)
+            face = frame
+
+        face = cv2.resize(face, target_size)
+        frames.append(face)
 
     cap.release()
 
