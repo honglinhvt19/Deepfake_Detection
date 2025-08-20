@@ -52,6 +52,7 @@ class Transformer(Layer):
             "head_size": self.head_size,
             "num_heads": self.num_heads,
             "ff_dim": self.ff_dim,
+            "dropout": self.dropout,
             "use_spatial_attention": self.use_spatial_attention})
         return config
 
