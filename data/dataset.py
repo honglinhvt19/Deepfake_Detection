@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import os
 import random
 from .preprocessing import preprocess_video
@@ -32,12 +33,13 @@ class Dataset:
         return list(video_paths), list(labels)
 
     def _generator(self):
+        dummy = np.zeros((self.num_frames, *self.frame_size, 3), dtype=np.float32)
         for video_path, label in zip(self.video_paths, self.labels):
             try:
                 frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
                 yield frames, tf.cast(label, tf.int32)
             except Exception as e:
-                continue
+                yield tf.convert_to_tensor(dummy), tf.cast(label, tf.int32)
 
     def as_dataset(self):
         output_signature = (
