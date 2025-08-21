@@ -33,7 +33,7 @@ class Fusion(Layer):
         selection_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
         self.selection.build(selection_input_shape)
 
-        bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
+        bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims//2)
         self.bn_projection.build(bn_input_shape)
 
         super().build(input_shape)
