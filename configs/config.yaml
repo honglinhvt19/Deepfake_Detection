@@ -22,6 +22,6 @@ training:
   freeze_epochs: 10
   optimizer: "adam"
   loss: "binary_crossentropy"
-  metrics: ["accuracy"]
+  metrics: ["accuracy", "precision", "recall", "f1", "roc_auc", "pr_auc"]
   checkpoint_dir: "./checkpoints"
   log_dir: "./logs"

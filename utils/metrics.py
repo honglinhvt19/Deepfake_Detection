@@ -1,23 +1,23 @@
 import tensorflow as tf
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score
+from keras.metrics import AUC, Precision, Recall
 
-def compute_metrics(model, dataset):
-    y_true = []
-    y_pred = []
-    
-    for frames, labels in dataset:
-        predictions = model.predict(frames, verbose=0)
-        y_true.extend(tf.argmax(labels, axis=1).numpy())
-        y_pred.extend(tf.argmax(predictions, axis=1).numpy())
-    
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-    
-    metrics = {
-        'precision': precision_score(y_true, y_pred, average='binary'),
-        'recall': recall_score(y_true, y_pred, average='binary'),
-        'f1_score': f1_score(y_true, y_pred, average='binary')
-    }
-    
-    return metrics
+def get_metrics(metric_names):
+    metric_objs = []
+    for m in metric_names:
+        m = m.lower()
+        if m == "accuracy":
+            metric_objs.append("accuracy")
+        elif m == "precision":
+            metric_objs.append(Precision(name="precision"))
+        elif m == "recall":
+            metric_objs.append(Recall(name="recall"))
+        elif m == "f1":
+            metric_objs.append(F1Score(name="f1"))
+        elif m == "roc_auc":
+            metric_objs.append(AUC(name="roc_auc"))
+        elif m == "pr_auc":
+            metric_objs.append(AUC(name="pr_auc", curve="PR"))
+        else:
+            raise ValueError(f"Unknown metric: {m}")
+    return metric_objs
