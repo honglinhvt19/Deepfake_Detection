@@ -59,13 +59,26 @@ def extracts_frames(video_path, num_frames=8, target_size=(224, 224)):
 
     return np.array(frames, dtype=np.uint8)[:num_frames]
 
+def frequency_augment(frame):
+    frame_freq = tf.signal.fft2d(tf.cast(frame, tf.complex64))
+    # Thêm noise nhẹ vào frequency
+    noise = tf.complex(tf.random.normal(tf.shape(frame_freq), stddev=0.01), tf.zeros(tf.shape(frame_freq)))
+    frame_freq += noise
+    return tf.cast(tf.math.real(tf.signal.ifft2d(frame_freq)), tf.float32)
 
 def augment_frame(frame):
+    frame = tf.image.random_flip_left_right(frame)
+    frame = tf.image.rot90(frame, k=tf.random.uniform(shape=[], minval=0, maxval=4, dtype=tf.int32))
+    frame = tf.image.random_brightness(frame, max_delta=0.2)  # Tăng delta
+    frame = tf.image.random_contrast(frame, lower=0.8, upper=1.2)
+    frame = tf.image.random_hue(frame, max_delta=0.1)  # Thêm hue
+    frame = tf.image.random_saturation(frame, lower=0.8, upper=1.2)  # Thêm saturation
     if tf.random.uniform([]) > 0.5:
-        frame = tf.image.flip_left_right(frame)
-    frame = tf.image.rot90(frame, k=tf.random.uniform([], 0, 2, dtype=tf.int32))
-    frame = tf.image.random_brightness(frame, max_delta=0.1)
-    frame = tf.image.random_contrast(frame, lower=0.9, upper=1.1)
+        frame = tf.clip_by_value(frame + tf.random.normal(tf.shape(frame), stddev=0.05), 0.0, 1.0)  # Gaussian noise
+    if tf.random.uniform([]) > 0.5:
+        frame = tf.image.random_jpeg_quality(frame, min_jpeg_quality=70, max_jpeg_quality=95)  # Compression
+    if tf.random.uniform([]) > 0.5:
+        frame = frequency_augment(frame)
     return frame
 
 

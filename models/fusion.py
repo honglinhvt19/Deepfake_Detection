@@ -1,6 +1,7 @@
 import tensorflow as tf
 import keras
 from keras.layers import Concatenate, Dense, BatchNormalization, Layer
+from keras.regularizers import l1
 
 @keras.saving.register_keras_serializable(package="Custom")
 class Fusion(Layer):
@@ -10,6 +11,7 @@ class Fusion(Layer):
         self.concat = Concatenate(axis=-1)
         self.bn_projection = BatchNormalization()
         self.feature_projection = None
+        self.selection = None
 
     def build(self, input_shape):
         if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 2:
@@ -27,6 +29,10 @@ class Fusion(Layer):
         projection_input_shape = (input_shape[0][0], input_shape[0][1], total_dims)
         self.feature_projection.build(projection_input_shape)
 
+        self.selection = Dense(self.embed_dims // 2, activation='relu', kernel_regularizer=l1(0.01), name="feature_selection")
+        selection_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
+        self.selection.build(selection_input_shape)
+
         bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
         self.bn_projection.build(bn_input_shape)
 
@@ -36,6 +42,7 @@ class Fusion(Layer):
         xception_features, efficientnet_features = inputs  # [B, T, D1], [B, T, D2]
         combined_features = self.concat([xception_features, efficientnet_features])  # [B, T, D1+D2]
         combined_features = self.feature_projection(combined_features)              # [B, T, embed_dim]
+        combined_features = self.selection(combined_features)                       # Feature selection with L1
         combined_features = self.bn_projection(combined_features, training=training)
         return combined_features
     

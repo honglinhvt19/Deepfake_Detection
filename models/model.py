@@ -39,6 +39,8 @@ class ModelBuilder(Model):
             x = layer(x, training=training)
 
         x = self.pooling(x)
+        x = keras.layers.Dense(512, activation='relu')(x)
+        x = keras.layers.Dense(256, activation='relu')(x)
         x = self.dropout(x, training=training)
         x = self.fc(x)
 

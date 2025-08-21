@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import random
+from sklearn.utils.class_weight import compute_class_weight
 from .preprocessing import preprocess_video
 
 class Dataset:
@@ -29,6 +30,10 @@ class Dataset:
         combined = list(zip(video_paths, labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
+
+        classes = np.unique(labels)
+        class_weights = compute_class_weight('balanced', classes=classes, y=labels)
+        self.class_weights = dict(zip(classes, class_weights))
 
         return list(video_paths), list(labels)
 
