@@ -14,38 +14,33 @@ class Dataset:
         self.video_paths, self.labels = self._load_data()
 
     def _load_data(self):
-        video_paths = []
-        labels = []
+        real_paths, fake_paths = [], []
 
-        for label, class_dir in enumerate(['real', 'fake']):
-            class_path = os.path.join(self.data_dir, class_dir)
-            if not os.path.exists(class_path):
-                continue
-            for video_name in os.listdir(class_path):
-                video_path = os.path.join(class_path, video_name)
-                video_paths.append(video_path)
-                labels.append(label)
+        for video_name in os.listdir(os.path.join(self.data_dir, "real")):
+            real_paths.append(os.path.join(self.data_dir, "real", video_name))
 
-        n_real, n_fake = len(video_paths[0]), len(video_paths[1])
+        for video_name in os.listdir(os.path.join(self.data_dir, "fake")):
+            fake_paths.append(os.path.join(self.data_dir, "fake", video_name))
+
+        # oversampling
+        n_real, n_fake = len(real_paths), len(fake_paths)
         if n_real > 0 and n_fake > 0:
             if n_real > n_fake:
-                # oversample fake
-                oversampled = random.choices(video_paths[1], k=n_real)
-                video_paths[1] = oversampled
+                fake_paths = random.choices(fake_paths, k=n_real)   # oversample fake
             elif n_fake > n_real:
-                # oversample real
-                oversampled = random.choices(video_paths[0], k=n_fake)
-                video_paths[0] = oversampled
+                real_paths = random.choices(real_paths, k=n_fake)   # oversample real
 
         # gộp lại
-        all_paths = video_paths[0] + video_paths[1]
-        all_labels = [0] * len(video_paths[0]) + [1] * len(video_paths[1])
+        all_paths = real_paths + fake_paths
+        all_labels = [0] * len(real_paths) + [1] * len(fake_paths)
 
+        # shuffle
         combined = list(zip(all_paths, all_labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
 
         return list(video_paths), list(labels)
+
 
     def _generator(self):
         dummy = np.zeros((self.num_frames, *self.frame_size, 3), dtype=np.float32)
