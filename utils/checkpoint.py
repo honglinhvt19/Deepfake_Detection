@@ -11,7 +11,7 @@ from models.model import ModelBuilder
 
 def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
-    checkpoint_path = os.path.join(checkpoint_dir, "model_{epoch:02d}.keras")
+    checkpoint_path = os.path.join(checkpoint_dir, f"model_{{epoch:02d}}-{{{monitor}:.4f}}.keras")
     print(f"Saving checkpoints to: {checkpoint_dir}")
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         checkpoint_path,
@@ -23,24 +23,28 @@ def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
     )
     return checkpoint_callback
 
-def load_checkpoint(model, checkpoint_path):
+def load_checkpoint(model, checkpoint_path, monitor='val_loss'):
     if not os.path.exists(checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
-        return model, 0
+        return model, None, None
     
     checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras')]
     if not checkpoint_files:
         print(f"Can't find checkpoint in {checkpoint_path}")
-        return model, 0
+        return model, None, None
     
     latest_checkpoint = None
     latest_epoch = -1
+    best_val_loss = None
+
     for f in checkpoint_files:
-        match = re.match(r"model_(\d+)+.keras", f)
+        match = re.match(r"model_(\d+)-([\d.]+)\.keras", f)
         if match:
             epoch = int(match.group(1))
+            val_loss = float(match.group(2))
             if epoch > latest_epoch:
                 latest_epoch = epoch
+                best_val_loss = val_loss
                 latest_checkpoint = os.path.join(checkpoint_path, f)
 
     if latest_checkpoint:
@@ -54,8 +58,13 @@ def load_checkpoint(model, checkpoint_path):
 
             with custom_object_scope(custom_objects):
                 loaded_model = load_model(latest_checkpoint, custom_objects=custom_objects)
-                print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch}")
-                return loaded_model, latest_epoch
+                print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch} (val_loss={best_val_loss:.4f})")
+
+                checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
+                if best_val_loss is not None:
+                    checkpoint_callback.best = best_val_loss
+                    print(f"Restored checkpoint_callback.best = {best_val_loss:.4f}")
+                return loaded_model, latest_epoch, best_val_loss, checkpoint_callback
         except Exception as e:
             print(f"Error: Can't load model {latest_checkpoint}: {e}")
             return model, 0
