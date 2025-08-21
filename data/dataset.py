@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import os
 import random
-from sklearn.utils.class_weight import compute_class_weight
 from .preprocessing import preprocess_video
 
 class Dataset:
@@ -27,13 +26,24 @@ class Dataset:
                 video_paths.append(video_path)
                 labels.append(label)
 
-        combined = list(zip(video_paths, labels))
+        n_real, n_fake = len(video_paths[0]), len(video_paths[1])
+        if n_real > 0 and n_fake > 0:
+            if n_real > n_fake:
+                # oversample fake
+                oversampled = np.random.choice(video_paths[1], size=n_real, replace=True).tolist()
+                video_paths[1] = oversampled
+            elif n_fake > n_real:
+                # oversample real
+                oversampled = np.random.choice(video_paths[0], size=n_fake, replace=True).tolist()
+                video_paths[0] = oversampled
+
+        # gộp lại
+        all_paths = video_paths[0] + video_paths[1]
+        all_labels = [0] * len(video_paths[0]) + [1] * len(video_paths[1])
+
+        combined = list(zip(all_paths, all_labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
-
-        classes = np.unique(labels)
-        class_weights = compute_class_weight('balanced', classes=classes, y=labels)
-        self.class_weights = dict(zip(classes, class_weights))
 
         return list(video_paths), list(labels)
 
