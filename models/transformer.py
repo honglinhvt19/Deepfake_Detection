@@ -12,7 +12,6 @@ class Transformer(Layer):
         self.dropout = dropout
         self.use_spatial_attention = use_spatial_attention
 
-        # Khai báo layer con
         self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
         self.dropout1 = Dropout(dropout)
         self.norm1 = LayerNormalization(epsilon=1e-6)
