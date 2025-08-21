@@ -29,11 +29,11 @@ class Fusion(Layer):
         projection_input_shape = (input_shape[0][0], input_shape[0][1], total_dims)
         self.feature_projection.build(projection_input_shape)
 
-        self.selection = Dense(self.embed_dims // 2, activation='relu', kernel_regularizer=l1(0.01), name="feature_selection")
+        self.selection = Dense(self.embed_dims, activation='relu', kernel_regularizer=l1(0.01), name="feature_selection")
         selection_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
         self.selection.build(selection_input_shape)
 
-        bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims//2)
+        bn_input_shape = (input_shape[0][0], input_shape[0][1], self.embed_dims)
         self.bn_projection.build(bn_input_shape)
 
         super().build(input_shape)
