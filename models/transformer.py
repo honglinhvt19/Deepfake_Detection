@@ -11,6 +11,8 @@ class Transformer(Layer):
         self.ff_dim = ff_dim
         self.dropout = dropout
         self.use_spatial_attention = use_spatial_attention
+
+        # Khai báo layer con
         self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
         self.dropout1 = Dropout(dropout)
         self.norm1 = LayerNormalization(epsilon=1e-6)
@@ -25,6 +27,14 @@ class Transformer(Layer):
         if self.use_spatial_attention:
             self.spatial_att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
             self.spatial_norm = LayerNormalization(epsilon=1e-6)
+
+    def build(self, input_shape):
+        _, t, d = input_shape
+        if d != self.head_size * self.num_heads:
+            raise ValueError(
+                f"Embedding dim ({d}) phải bằng head_size * num_heads ({self.head_size * self.num_heads})"
+            )
+        super().build(input_shape)
 
     def call(self, inputs, training=False):
         x = inputs 
