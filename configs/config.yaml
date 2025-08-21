@@ -1,7 +1,7 @@
 model:
   num_classes: 1
   num_frames: 16 # number of frames to process
-  embed_dims: 512
+  embed_dims: 256
   num_heads: 8
   ff_dim: 2048
   num_transformer_layers: 6 # number of transformer layers
