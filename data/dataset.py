@@ -30,11 +30,11 @@ class Dataset:
         if n_real > 0 and n_fake > 0:
             if n_real > n_fake:
                 # oversample fake
-                oversampled = random.choices(video_paths[1], size=n_real)
+                oversampled = random.choices(video_paths[1], k=n_real)
                 video_paths[1] = oversampled
             elif n_fake > n_real:
                 # oversample real
-                oversampled = random.choices(video_paths[0], size=n_fake)
+                oversampled = random.choices(video_paths[0], k=n_fake)
                 video_paths[0] = oversampled
 
         # gộp lại
