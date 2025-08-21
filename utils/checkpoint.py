@@ -26,12 +26,14 @@ def create_checkpoint_callback(checkpoint_dir, monitor='val_loss', mode='min'):
 def load_checkpoint(model, checkpoint_path, monitor='val_loss'):
     if not os.path.exists(checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
-        return model, None, None
+        checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
+        return model, 0, float("inf"), checkpoint_callback
     
     checkpoint_files = [f for f in os.listdir(checkpoint_path) if f.endswith('.keras')]
     if not checkpoint_files:
         print(f"Can't find checkpoint in {checkpoint_path}")
-        return model, None, None
+        checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
+        return model, 0, float("inf"), checkpoint_callback
     
     latest_checkpoint = None
     latest_epoch = -1
@@ -67,7 +69,9 @@ def load_checkpoint(model, checkpoint_path, monitor='val_loss'):
                 return loaded_model, latest_epoch, best_val_loss, checkpoint_callback
         except Exception as e:
             print(f"Error: Can't load model {latest_checkpoint}: {e}")
-            return model, 0
+            checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
+            return model, 0, float("inf"), checkpoint_callback
     else:
         print(f"Can't find checkpoint in {checkpoint_path}")
-        return model, 0
+        checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
+        return model, 0, float("inf"), checkpoint_callback
