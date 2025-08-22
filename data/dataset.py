@@ -14,28 +14,19 @@ class Dataset:
         self.video_paths, self.labels = self._load_data()
 
     def _load_data(self):
-        real_paths, fake_paths = [], []
+        video_paths = []
+        labels = []
 
-        for video_name in os.listdir(os.path.join(self.data_dir, "real")):
-            real_paths.append(os.path.join(self.data_dir, "real", video_name))
+        for label, class_dir in enumerate(['real', 'fake']):
+            class_path = os.path.join(self.data_dir, class_dir)
+            if not os.path.exists(class_path):
+                continue
+            for video_name in os.listdir(class_path):
+                video_path = os.path.join(class_path, video_name)
+                video_paths.append(video_path)
+                labels.append(label)
 
-        for video_name in os.listdir(os.path.join(self.data_dir, "fake")):
-            fake_paths.append(os.path.join(self.data_dir, "fake", video_name))
-
-        # oversampling
-        n_real, n_fake = len(real_paths), len(fake_paths)
-        if n_real > 0 and n_fake > 0:
-            if n_real > n_fake:
-                fake_paths = random.choices(fake_paths, k=n_real)   # oversample fake
-            elif n_fake > n_real:
-                real_paths = random.choices(real_paths, k=n_fake)   # oversample real
-
-        # gộp lại
-        all_paths = real_paths + fake_paths
-        all_labels = [0] * len(real_paths) + [1] * len(fake_paths)
-
-        # shuffle
-        combined = list(zip(all_paths, all_labels))
+        combined = list(zip(video_paths, labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
 
