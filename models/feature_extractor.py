@@ -42,7 +42,7 @@ class FeatureExtractor(keras.layers.Layer):
         eff  = tf.reshape(eff,  (b, t, eff.shape[-1]))
 
         xcep.set_shape([None, None, 2048])
-        eff.set_shape([None, None, 1280])
+        eff.set_shape([None, None, 1536])
 
         return xcep, eff
 
