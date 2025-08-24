@@ -1,57 +1,77 @@
 import tensorflow as tf
-import numpy as np
 import os
 import random
-from .preprocessing import preprocess_video
+import numpy as np
+from .preprocessing import extract_frames, IMAGE_SIZE
 
 class Dataset:
-    def __init__(self, data_dir, batch_size=16, num_frames=8, frame_size=(224, 224), training=True, video_paths=None, labels=None):
+    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_frames = num_frames
-        self.frame_size = frame_size
         self.training = training
         self.video_paths, self.labels = self._load_data()
 
     def _load_data(self):
-        video_paths = []
-        labels = []
-
-        for label, class_dir in enumerate(['real', 'fake']):
-            class_path = os.path.join(self.data_dir, class_dir)
-            if not os.path.exists(class_path):
+        video_paths, labels = [], []
+        for label, cls in enumerate(["real", "fake"]):
+            class_dir = os.path.join(self.data_dir, cls)
+            if not os.path.exists(class_dir):
                 continue
-            for video_name in os.listdir(class_path):
-                video_path = os.path.join(class_path, video_name)
-                video_paths.append(video_path)
-                labels.append(label)
-
+            for f in os.listdir(class_dir):
+                if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+                    video_paths.append(os.path.join(class_dir, f))
+                    labels.append(label)
+        # shuffle toàn bộ dataset
         combined = list(zip(video_paths, labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
-
         return list(video_paths), list(labels)
 
+    def _process_video(self, video_path, label):
+        frames = extract_frames(video_path.numpy().decode("utf-8"), self.num_frames, IMAGE_SIZE)
+        frames = frames.astype(np.float32) / 255.0
+        return frames, np.int32(label)
 
-    def _generator(self):
-        dummy = np.zeros((self.num_frames, *self.frame_size, 3), dtype=np.float32)
-        for video_path, label in zip(self.video_paths, self.labels):
-            try:
-                frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
-                yield frames.numpy(), int(label)
-            except Exception as e:
-                print(f"[ERROR] {video_path} -> {e}")
-                yield dummy, int(label)
-
-    def as_dataset(self):
-        output_signature = (
-            tf.TensorSpec(shape=(self.num_frames, *self.frame_size, 3), dtype=tf.float32),
-            tf.TensorSpec(shape=(), dtype=tf.int32)
+    def _tf_wrapper(self, video_path, label):
+        frames, label = tf.numpy_function(
+            self._process_video, [video_path, label], [tf.float32, tf.int32]
         )
-        dataset = tf.data.Dataset.from_generator(self._generator, output_signature=output_signature)
-        if self.training:
-            dataset = dataset.shuffle(buffer_size=1000, reshuffle_each_iteration=True)
+        frames.set_shape((self.num_frames, *IMAGE_SIZE, 3))
+        label.set_shape(())
+        return frames, label
 
-        dataset = dataset.repeat()
+    def _augment_frame(self, frame):
+        frame = tf.image.random_flip_left_right(frame)
+        frame = tf.image.random_brightness(frame, max_delta=0.1)
+        frame = tf.image.random_contrast(frame, 0.9, 1.1)
+        frame = tf.image.random_saturation(frame, 0.9, 1.1)
+        return frame
+
+    def _augment_video(self, frames, label):
+        frames = tf.map_fn(self._augment_frame, frames)
+        return frames, label
+
+    # -------------------- Video-level dataset --------------------
+    def as_dataset(self):
+        dataset = tf.data.Dataset.from_tensor_slices((self.video_paths, self.labels))
+        if self.training:
+            dataset = dataset.shuffle(1000, reshuffle_each_iteration=True)
+        dataset = dataset.map(self._tf_wrapper, num_parallel_calls=tf.data.AUTOTUNE)
+        if self.training:
+            dataset = dataset.map(self._augment_video, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return dataset
+
+    # -------------------- Image-level dataset --------------------
+    def as_image_dataset(self):
+        ds_video = self.as_dataset()
+
+        def flatten_video(frames, label):
+            labels = tf.repeat(label, self.num_frames)
+            return frames, labels
+
+        ds_image = ds_video.map(flatten_video, num_parallel_calls=tf.data.AUTOTUNE)
+        ds_image = ds_image.unbatch()
+        ds_image = ds_image.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        return ds_image
