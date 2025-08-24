@@ -65,23 +65,25 @@ class Dataset:
 
     # -------------------- Image-level dataset --------------------
     def as_image_dataset(self):
-        # load video-level dataset
         ds_video = tf.data.Dataset.from_tensor_slices((self.video_paths, self.labels))
         if self.training:
             ds_video = ds_video.shuffle(1000, reshuffle_each_iteration=True)
 
-        # decode video -> (num_frames,224,224,3), label
         ds_video = ds_video.map(self._tf_wrapper, num_parallel_calls=tf.data.AUTOTUNE)
-
-        # augment nếu training
         if self.training:
             ds_video = ds_video.map(self._augment_video, num_parallel_calls=tf.data.AUTOTUNE)
 
-        # --------- chuyển video-level -> frame-level ---------
-        # (num_frames,224,224,3), ()  -->  (224,224,3), ()
-        ds_frames = ds_video.unbatch()
+        # ---- nhân label cho từng frame ----
+        def expand_label(frames, label):
+            labels = tf.repeat(label, self.num_frames)         # (num_frames,)
+            return frames, labels
 
-        # batch lại chuẩn cho Xception/EfficientNet
+        ds_expanded = ds_video.map(expand_label, num_parallel_calls=tf.data.AUTOTUNE)
+
+        # ---- unbatch để ra từng frame ----
+        ds_frames = ds_expanded.unbatch()   # (224,224,3), ()
+
         ds_frames = ds_frames.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return ds_frames
+
 
