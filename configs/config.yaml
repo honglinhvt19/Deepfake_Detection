@@ -3,8 +3,8 @@ model:
   num_frames: 8 # number of frames to process
   embed_dims: 256
   num_heads: 8
-  ff_dim: 2048
-  num_transformer_layers: 6 # number of transformer layers
+  ff_dim: 1024
+  num_transformer_layers: 4 # number of transformer layers
   dropout_rate: 0.3 #spatial dropout rate
   use_spatial_attention: false # whether to use spatial attention
 

@@ -12,7 +12,7 @@ class FeatureExtractor(keras.layers.Layer):
             input_shape=(299,299,3)
         )
 
-        self.eff_backbone = keras.applications.EfficientNetB5(
+        self.eff_backbone = keras.applications.EfficientNetB0(
             include_top=False, weights="imagenet", pooling="avg",
             input_shape=(224,224,3)
         )
@@ -42,7 +42,7 @@ class FeatureExtractor(keras.layers.Layer):
         eff  = tf.reshape(eff,  (b, t, eff.shape[-1]))
 
         xcep.set_shape([None, None, 2048])
-        eff.set_shape([None, None, 2048])
+        eff.set_shape([None, None, 1280])
 
         return xcep, eff
 

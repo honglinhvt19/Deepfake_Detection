@@ -5,7 +5,7 @@ import numpy as np
 from .preprocessing import extract_frames, IMAGE_SIZE
 
 class Dataset:
-    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True, max_upsampling_ratio=3.0):
+    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True, max_upsampling_ratio=5.0):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_frames = num_frames
@@ -116,7 +116,6 @@ class Dataset:
         if not os.path.exists(split_dir):
             raise ValueError(f"Split directory not found: {split_dir}")
         
-        # Training split có upsampling, test/val không có
         training = (split == 'train')
         
         dataset = Dataset(
