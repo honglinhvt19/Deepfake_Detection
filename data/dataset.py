@@ -5,28 +5,73 @@ import numpy as np
 from .preprocessing import extract_frames, IMAGE_SIZE
 
 class Dataset:
-    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True):
+    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True, max_upsampling_ratio=3.0):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_frames = num_frames
         self.training = training
+        self.max_upsampling_ratio = max_upsampling_ratio
         self.video_paths, self.labels = self._load_data()
 
     def _load_data(self):
         video_paths, labels = [], []
-        for label, cls in enumerate(["real", "fake"]):
-            class_dir = os.path.join(self.data_dir, cls)
-            if not os.path.exists(class_dir):
-                continue
-            for f in os.listdir(class_dir):
+        real_videos, fake_videos = [], []
+        
+        real_dir = os.path.join(self.data_dir, "real")
+        if os.path.exists(real_dir):
+            for f in os.listdir(real_dir):
                 if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
-                    video_paths.append(os.path.join(class_dir, f))
-                    labels.append(label)
-        # shuffle toàn bộ dataset
-        combined = list(zip(video_paths, labels))
+                    real_videos.append(os.path.join(real_dir, f))
+        
+        fake_dir = os.path.join(self.data_dir, "fake") 
+        if os.path.exists(fake_dir):
+            for f in os.listdir(fake_dir):
+                if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+                    fake_videos.append(os.path.join(fake_dir, f))
+
+        print(f"Original data - Real: {len(real_videos)}, Fake: {len(fake_videos)}")
+        all_videos, all_labels = self._smart_upsampling(real_videos, fake_videos)
+
+        combined = list(zip(all_videos, all_labels))
         random.shuffle(combined)
         video_paths, labels = zip(*combined)
+
         return list(video_paths), list(labels)
+    
+    def _smart_upsampling(self, real_videos, fake_videos):
+        if len(real_videos) == 0 or len(fake_videos) == 0:
+            return real_videos + fake_videos, [0] * len(real_videos) + [1] * len(fake_videos)
+        
+        minority_class = real_videos if len(real_videos) < len(fake_videos) else fake_videos
+        majority_class = fake_videos if len(real_videos) < len(fake_videos) else real_videos
+        minority_label = 0 if len(real_videos) < len(fake_videos) else 1
+        majority_label = 1 - minority_label
+        
+        imbalance_ratio = len(majority_class) / len(minority_class)
+        
+        if imbalance_ratio <= 3.0:
+            target_minority_size = len(minority_class)
+            
+        elif imbalance_ratio <= 5.0:
+            target_minority_size = int(len(majority_class) / 2.5)
+            
+        else:
+            max_minority_size = int(len(minority_class) * self.max_upsampling_ratio)
+            target_from_ratio = len(majority_class) // 4
+            target_minority_size = min(max_minority_size, target_from_ratio)
+        
+        num_to_add = max(0, target_minority_size - len(minority_class))
+        
+        if num_to_add > 0:
+            upsampled_minority = random.choices(minority_class, k=num_to_add)
+            all_videos = minority_class + upsampled_minority + majority_class
+            all_labels = ([minority_label] * (len(minority_class) + num_to_add) + 
+                         [majority_label] * len(majority_class))
+        else:
+            all_videos = minority_class + majority_class
+            all_labels = [minority_label] * len(minority_class) + [majority_label] * len(majority_class)
+        
+        return all_videos, all_labels
 
     def _process_video(self, video_path, label):
         frames = extract_frames(video_path.decode("utf-8"), self.num_frames, IMAGE_SIZE)
@@ -52,7 +97,6 @@ class Dataset:
         frames = tf.map_fn(self._augment_frame, frames)
         return frames, label
 
-    # -------------------- Video-level dataset --------------------
     def as_dataset(self):
         dataset = tf.data.Dataset.from_tensor_slices((self.video_paths, self.labels))
         if self.training:
@@ -63,27 +107,26 @@ class Dataset:
         dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return dataset
 
-    # -------------------- Image-level dataset --------------------
-    def as_image_dataset(self):
-        ds_video = tf.data.Dataset.from_tensor_slices((self.video_paths, self.labels))
-        if self.training:
-            ds_video = ds_video.shuffle(1000, reshuffle_each_iteration=True)
+    @staticmethod
+    def load_split_dataset(base_dir, split='train', batch_size=8, num_frames=8, 
+                         max_upsampling_ratio=3.0):
 
-        ds_video = ds_video.map(self._tf_wrapper, num_parallel_calls=tf.data.AUTOTUNE)
-        if self.training:
-            ds_video = ds_video.map(self._augment_video, num_parallel_calls=tf.data.AUTOTUNE)
-
-        # ---- nhân label cho từng frame ----
-        def expand_label(frames, label):
-            labels = tf.repeat(label, self.num_frames)         # (num_frames,)
-            return frames, labels
-
-        ds_expanded = ds_video.map(expand_label, num_parallel_calls=tf.data.AUTOTUNE)
-
-        # ---- unbatch để ra từng frame ----
-        ds_frames = ds_expanded.unbatch()   # (224,224,3), ()
-
-        ds_frames = ds_frames.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
-        return ds_frames
+        split_dir = os.path.join(base_dir, split)
+        
+        if not os.path.exists(split_dir):
+            raise ValueError(f"Split directory not found: {split_dir}")
+        
+        # Training split có upsampling, test/val không có
+        training = (split == 'train')
+        
+        dataset = Dataset(
+            data_dir=split_dir,
+            batch_size=batch_size,
+            num_frames=num_frames,
+            training=training,
+            max_upsampling_ratio=max_upsampling_ratio
+        )
+        
+        return dataset
 
 
