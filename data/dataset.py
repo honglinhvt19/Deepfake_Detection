@@ -29,7 +29,7 @@ class Dataset:
         return list(video_paths), list(labels)
 
     def _process_video(self, video_path, label):
-        frames = extract_frames(video_path.numpy().decode("utf-8"), self.num_frames, IMAGE_SIZE)
+        frames = extract_frames(video_path.decode("utf-8"), self.num_frames, IMAGE_SIZE)
         frames = frames.astype(np.float32) / 255.0
         return frames, np.int32(label)
 
