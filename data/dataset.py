@@ -68,11 +68,9 @@ class Dataset:
         ds_video = self.as_dataset()
 
         def split_frames(frames, label):
-
             labels = tf.repeat(label, self.num_frames)
-            return frames, labels   
+            return tf.data.Dataset.from_tensor_slices((frames, labels))
 
-        ds_image = ds_video.map(split_frames, num_parallel_calls=tf.data.AUTOTUNE)
-        ds_image = ds_image.unbatch()
+        ds_image = ds_video.flat_map(lambda f, l: split_frames(f, l))
         ds_image = ds_image.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
         return ds_image
