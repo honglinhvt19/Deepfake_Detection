@@ -40,6 +40,7 @@ class Dataset:
                 frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
                 yield frames, tf.cast(label, tf.int32)
             except Exception as e:
+                print(f"[ERROR] {video_path} -> {e}")
                 yield tf.convert_to_tensor(dummy), tf.cast(label, tf.int32)
 
     def as_dataset(self):
