@@ -41,7 +41,7 @@ class Dataset:
                 yield frames.numpy(), int(label)
             except Exception as e:
                 print(f"[ERROR] {video_path} -> {e}")
-                yield tf.convert_to_tensor(dummy), tf.cast(label, tf.int32)
+                yield dummy, int(label)
 
     def as_dataset(self):
         output_signature = (
