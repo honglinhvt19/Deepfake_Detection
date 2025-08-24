@@ -9,7 +9,7 @@ from models.fusion import Fusion
 from models.transformer import Transformer
 from models.model import ModelBuilder
 
-def create_checkpoint_callback(checkpoint_dir, monitor='val_auc', mode='min'):
+def create_checkpoint_callback(checkpoint_dir, monitor='val_roc_auc', mode='min'):
     os.makedirs(checkpoint_dir, exist_ok=True)
     checkpoint_path = os.path.join(checkpoint_dir, f"model_{{epoch:02d}}-{{{monitor}:.4f}}.keras")
     print(f"Saving checkpoints to: {checkpoint_dir}")
@@ -23,7 +23,7 @@ def create_checkpoint_callback(checkpoint_dir, monitor='val_auc', mode='min'):
     )
     return checkpoint_callback
 
-def load_checkpoint(model, checkpoint_path, monitor='val_auc'):
+def load_checkpoint(model, checkpoint_path, monitor='val_roc_auc'):
     if not os.path.exists(checkpoint_path):
         print(f"Can't find checkpoint at {checkpoint_path}")
         checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
