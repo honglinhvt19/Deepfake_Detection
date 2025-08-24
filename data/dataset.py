@@ -38,7 +38,7 @@ class Dataset:
         for video_path, label in zip(self.video_paths, self.labels):
             try:
                 frames = preprocess_video(video_path, self.num_frames, self.frame_size, training=self.training)
-                yield frames, tf.cast(label, tf.int32)
+                yield frames.numpy(), int(label)
             except Exception as e:
                 print(f"[ERROR] {video_path} -> {e}")
                 yield tf.convert_to_tensor(dummy), tf.cast(label, tf.int32)
