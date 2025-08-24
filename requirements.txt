@@ -8,4 +8,5 @@ seaborn==0.12.2
 numpy==1.26.0
 jax==0.4.13 
 jaxlib==0.4.13
-mtcnn==1.0.0
+insightface
+onnxruntime-gpu 
