@@ -60,7 +60,7 @@ def load_checkpoint(model, checkpoint_path, monitor='val_roc_auc'):
 
             with custom_object_scope(custom_objects):
                 loaded_model = load_model(latest_checkpoint, custom_objects=custom_objects)
-                print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch} (val_auc={best_val_auc:.4f})")
+                print(f"Loaded model from {latest_checkpoint} at epoch {latest_epoch} (val_roc_auc={best_val_auc:.4f})")
 
                 checkpoint_callback = create_checkpoint_callback(checkpoint_path, monitor=monitor)
                 if best_val_auc is not None:
