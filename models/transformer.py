@@ -12,19 +12,19 @@ class Transformer(Layer):
         self.dropout = dropout
         self.use_spatial_attention = use_spatial_attention
 
-        self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
-        self.dropout1 = Dropout(dropout)
+        self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25)
+        self.dropout1 = Dropout(0.25)
         self.norm1 = LayerNormalization(epsilon=1e-6)
 
         self.ffn = keras.Sequential([
             Dense(ff_dim, activation="relu"),
             Dense(head_size * num_heads),
         ])
-        self.dropout2 = Dropout(dropout)
+        self.dropout2 = Dropout(0.25)
         self.norm2 = LayerNormalization(epsilon=1e-6)
 
         if self.use_spatial_attention:
-            self.spatial_att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=dropout)
+            self.spatial_att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25)
             self.spatial_norm = LayerNormalization(epsilon=1e-6)
 
     def build(self, input_shape):

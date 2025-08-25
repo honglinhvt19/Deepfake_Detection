@@ -30,13 +30,19 @@ class Dataset:
                     fake_videos.append(os.path.join(fake_dir, f))
 
         print(f"Original data - Real: {len(real_videos)}, Fake: {len(fake_videos)}")
-        all_videos, all_labels = self._smart_upsampling(real_videos, fake_videos)
+
+        if self.training:
+            all_videos, all_labels = self._smart_upsampling(real_videos, fake_videos)
+        else:
+            all_videos = real_videos + fake_videos
+            all_labels = [0] * len(real_videos) + [1] * len(fake_videos)
 
         combined = list(zip(all_videos, all_labels))
         random.shuffle(combined)
-        video_paths, labels = zip(*combined)
+        video_paths, labels = zip(*combined) if combined else ([], [])
 
         return list(video_paths), list(labels)
+
     
     def _smart_upsampling(self, real_videos, fake_videos):
         if len(real_videos) == 0 or len(fake_videos) == 0:
@@ -57,7 +63,7 @@ class Dataset:
             
         else:
             max_minority_size = int(len(minority_class) * self.max_upsampling_ratio)
-            target_from_ratio = len(majority_class) // 4
+            target_from_ratio = len(majority_class) // 2
             target_minority_size = min(max_minority_size, target_from_ratio)
         
         num_to_add = max(0, target_minority_size - len(minority_class))
