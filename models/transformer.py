@@ -40,13 +40,8 @@ class Transformer(Layer):
 
         # ---------------- Spatial Attention ----------------
         if self.use_spatial_attention:
-            x_t = tf.transpose(x, [0, 2, 1])              # [B, D, T]
-            x_t = self.spatial_att(x_t, x_t, training=training)
-            x_small = tf.image.resize(x, (tf.shape(x)[1]//2, tf.shape(x)[2]//2))
-            x_small = self.spatial_att(x_small, x_small, training=training)
-            x_small = tf.image.resize(x_small, tf.shape(x)[1:])
-            x_t = self.spatial_norm(x_t + tf.transpose(x, [0, 2, 1]) + tf.transpose(x_small, [0, 2, 1]))
-            x = tf.transpose(x_t, [0, 2, 1])
+            x_spatial = self.spatial_att(x, x, training=training)
+            x = self.spatial_norm(x + x_spatial)
 
         # ---------------- Temporal Attention ----------------
         attn_output = self.att(x, x, training=training)
