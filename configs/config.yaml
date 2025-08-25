@@ -1,6 +1,6 @@
 model:
   num_classes: 1
-  num_frames: 16 # number of frames to process
+  num_frames: 10 # number of frames to process
   embed_dims: 256
   num_heads: 8
   ff_dim: 2048
