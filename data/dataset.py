@@ -5,7 +5,7 @@ import numpy as np
 from .preprocessing import extract_frames, IMAGE_SIZE
 
 class Dataset:
-    def __init__(self, data_dir, batch_size=16, num_frames=8, training=True, max_upsampling_ratio=5.0):
+    def __init__(self, data_dir, batch_size=16, num_frames=8, training=False, max_upsampling_ratio=5.0):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_frames = num_frames
@@ -78,6 +78,44 @@ class Dataset:
             all_labels = [minority_label] * len(minority_class) + [majority_label] * len(majority_class)
         
         return all_videos, all_labels
+
+    def load_test_dataset(self):
+        real_dir = os.path.join(self.data_dir, "test", "real")
+        fake_dir = os.path.join(self.data_dir, "test", "fake")
+
+        video_paths, labels = [], []
+
+        if os.path.exists(real_dir):
+            for f in os.listdir(real_dir):
+                if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+                    video_paths.append(os.path.join(real_dir, f))
+                    labels.append(0)  # real = 0
+
+        if os.path.exists(fake_dir):
+            for f in os.listdir(fake_dir):
+                if f.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+                    video_paths.append(os.path.join(fake_dir, f))
+                    labels.append(1)  # fake = 1
+
+        print(f"Loaded test set - Real: {labels.count(0)}, Fake: {labels.count(1)}")
+
+        def generator():
+            for path, label in zip(video_paths, labels):
+                try:
+                    frames = extract_frames(path, self.num_frames, self.frame_size, training=False)
+                    yield frames.numpy(), label
+                except Exception as e:
+                    print(f"[ERROR] {path} -> {e}")
+
+        output_signature = (
+            tf.TensorSpec(shape=(self.num_frames, *self.frame_size, 3), dtype=tf.float32),
+            tf.TensorSpec(shape=(), dtype=tf.int32)
+        )
+
+        dataset = tf.data.Dataset.from_generator(generator, output_signature=output_signature)
+        dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+
+        return dataset
 
     def _process_video(self, video_path, label):
         frames = extract_frames(video_path.decode("utf-8"), self.num_frames, IMAGE_SIZE)
