@@ -102,13 +102,13 @@ class Dataset:
         def generator():
             for path, label in zip(video_paths, labels):
                 try:
-                    frames = extract_frames(path, self.num_frames, self.frame_size, training=False)
-                    yield frames.numpy(), label
+                    frames = extract_frames(path, self.num_frames, IMAGE_SIZE, training=False)
+                    yield frames, label
                 except Exception as e:
                     print(f"[ERROR] {path} -> {e}")
 
         output_signature = (
-            tf.TensorSpec(shape=(self.num_frames, *self.frame_size, 3), dtype=tf.float32),
+            tf.TensorSpec(shape=(self.num_frames, *IMAGE_SIZE, 3), dtype=tf.float32),
             tf.TensorSpec(shape=(), dtype=tf.int32)
         )
 
