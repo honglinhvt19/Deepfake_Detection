@@ -102,7 +102,7 @@ class Dataset:
         def generator():
             for path, label in zip(video_paths, labels):
                 try:
-                    frames = extract_frames(path, self.num_frames, IMAGE_SIZE, training=False)
+                    frames = extract_frames(path, self.num_frames, IMAGE_SIZE)
                     yield frames, label
                 except Exception as e:
                     print(f"[ERROR] {path} -> {e}")

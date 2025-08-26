@@ -41,15 +41,18 @@ class Transformer(Layer):
         # ---------------- Spatial Attention ----------------
         if self.use_spatial_attention:
             x_spatial = self.spatial_att(x, x, training=training)
+            x_spatial = tf.cast(x_spatial, x.dtype) 
             x = self.spatial_norm(x + x_spatial)
 
         # ---------------- Temporal Attention ----------------
         attn_output = self.att(x, x, training=training)
         attn_output = self.dropout1(attn_output, training=training)
+        attn_output = tf.cast(attn_output, x.dtype)
         out1 = self.norm1(x + attn_output)
 
         ffn_output = self.ffn(out1, training=training)
         ffn_output = self.dropout2(ffn_output, training=training)
+        ffn_output = tf.cast(ffn_output, out1.dtype) 
         ffn_output = self.norm2(out1 + ffn_output)
         return ffn_output
 
