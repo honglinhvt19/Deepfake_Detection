@@ -1,6 +1,7 @@
 import tensorflow as tf
 import keras
 
+@keras.saving.register_keras_serializable(package="Custom")
 class FeatureExtractor(keras.layers.Layer):
     def __init__(self, freeze_ratio=1.0, input_size=(224,224),  **kwargs):
         super().__init__(**kwargs)
