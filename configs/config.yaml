@@ -9,7 +9,7 @@ model:
   use_spatial_attention: true # whether to use spatial attention
 
 data:
-  data_dir: "D:\\Học\\dataset"
+  data_dir: "/kaggle/input/celeb-df/dataset"
   batch_size: 16
   num_frames: 8
   frame_size: [224, 224]
