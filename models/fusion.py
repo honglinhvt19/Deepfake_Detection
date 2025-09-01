@@ -5,11 +5,11 @@ from keras.regularizers import l1
 
 @keras.saving.register_keras_serializable(package="Custom")
 class Fusion(Layer):
-    def __init__(self, embed_dims=256, **kwargs):
+    def __init__(self, embed_dims=256, name="Fusion",**kwargs):
         super().__init__(**kwargs)
         self.embed_dims = embed_dims
-        self.concat = Concatenate(axis=-1)
-        self.bn_projection = BatchNormalization()
+        self.concat = Concatenate(axis=-1, name="concat_features")
+        self.bn_projection = BatchNormalization(name="bn_projection")
         self.feature_projection = None
         # self.selection = None
 

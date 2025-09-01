@@ -4,7 +4,7 @@ from keras.layers import Layer, MultiHeadAttention, Dropout, LayerNormalization,
 
 @keras.saving.register_keras_serializable(package="Custom")
 class Transformer(Layer):
-    def __init__(self, head_size, num_heads, ff_dim, dropout=0.1, use_spatial_attention=True, **kwargs):
+    def __init__(self, head_size, num_heads, ff_dim, dropout=0.1, use_spatial_attention=True, name="Transformer", **kwargs):
         super().__init__(**kwargs)
         self.head_size = head_size
         self.num_heads = num_heads
@@ -12,20 +12,20 @@ class Transformer(Layer):
         self.dropout = dropout
         self.use_spatial_attention = use_spatial_attention
 
-        self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25)
-        self.dropout1 = Dropout(0.25)
-        self.norm1 = LayerNormalization(epsilon=1e-6)
+        self.att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25, name="temporal_attention")
+        self.dropout1 = Dropout(0.25, name="dropout_temporal")
+        self.norm1 = LayerNormalization(epsilon=1e-6, name="norm_temporal")
 
         self.ffn = keras.Sequential([
-            Dense(ff_dim, activation="relu"),
-            Dense(head_size * num_heads),
+            Dense(ff_dim, activation="relu", name="ffn_dense1"),
+            Dense(head_size * num_heads, name="ffn_dense2"),
         ])
-        self.dropout2 = Dropout(0.25)
-        self.norm2 = LayerNormalization(epsilon=1e-6)
+        self.dropout2 = Dropout(0.25, name="dropout_ffn")
+        self.norm2 = LayerNormalization(epsilon=1e-6, name="norm_ffn")
 
         if self.use_spatial_attention:
-            self.spatial_att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25)
-            self.spatial_norm = LayerNormalization(epsilon=1e-6)
+            self.spatial_att = MultiHeadAttention(num_heads=num_heads, key_dim=head_size, dropout=0.25, name="spatial_attention")
+            self.spatial_norm = LayerNormalization(epsilon=1e-6, name="norm_spatial")
 
     def build(self, input_shape):
         _, t, d = input_shape

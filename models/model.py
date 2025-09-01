@@ -25,10 +25,10 @@ class ModelBuilder(Model):
             for _ in range(num_transformer_layers)
         ]
 
-        self.pooling = keras.layers.GlobalAveragePooling1D()
-        self.dropout = keras.layers.Dropout(dropout_rate)
+        self.pooling = keras.layers.GlobalAveragePooling1D(name="global_avg_pool")
+        self.dropout = keras.layers.Dropout(dropout_rate, name="dropout_final")
 
-        self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid", dtype='float32',)
+        self.fc = keras.layers.Dense(self.num_classes, activation="sigmoid", dtype='float32', name="output")
 
     def call(self, inputs, training=False):
         xcep_feat, eff_feat = self.feature_extractor(inputs, training=training)
@@ -45,6 +45,6 @@ class ModelBuilder(Model):
         return x
 
     def create_model(self):
-        inputs = keras.Input(shape=(self.num_frames, 224, 224, 3))
+        inputs = keras.Input(shape=(self.num_frames, 224, 224, 3), name="input")
         outputs = self.call(inputs)
         return Model(inputs=inputs, outputs=outputs, name="DeepfakeDetectionModel")

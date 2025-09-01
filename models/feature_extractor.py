@@ -3,19 +3,19 @@ import keras
 
 @keras.saving.register_keras_serializable(package="Custom")
 class FeatureExtractor(keras.layers.Layer):
-    def __init__(self, freeze_ratio=1.0, input_size=(224,224),  **kwargs):
+    def __init__(self, freeze_ratio=1.0, input_size=(224,224), name="Feature_Extractor" ,**kwargs):
         super().__init__(**kwargs)
         self.freeze_ratio = freeze_ratio
         self.input_size = input_size
 
         self.xcep_backbone = keras.applications.Xception(
             include_top=False, weights="imagenet", pooling="avg",
-            input_shape=(299,299,3)
+            input_shape=(299,299,3), name="Xception_Backbone"
         )
 
         self.eff_backbone = keras.applications.EfficientNetB0(
             include_top=False, weights="imagenet", pooling="avg",
-            input_shape=(224,224,3)
+            input_shape=(224,224,3), name="EfficientNetB0_Backbone"
         )
 
         self._apply_freeze_ratio(self.xcep_backbone, self.freeze_ratio)
