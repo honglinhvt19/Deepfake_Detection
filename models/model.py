@@ -14,8 +14,8 @@ class ModelBuilder(Model):
         self.num_frames = num_frames
         self.use_spartial_attention = use_spatial_attention
 
-        self.feature_extractor = FeatureExtractor(freeze_ratio=freeze_ratio)
-        self.fusion = Fusion(embed_dims=embed_dims)
+        self.feature_extractor = FeatureExtractor(freeze_ratio=freeze_ratio, name="FeatureExtractor")
+        self.fusion = Fusion(embed_dims=embed_dims, name="Fusion")
 
         self.transformer_layers = [
             Transformer(embed_dims//num_heads,
@@ -48,3 +48,9 @@ class ModelBuilder(Model):
         inputs = keras.Input(shape=(self.num_frames, 224, 224, 3), name="input")
         outputs = self.call(inputs)
         return Model(inputs=inputs, outputs=outputs, name="DeepfakeDetectionModel")
+    
+
+if __name__ == "__main__":
+    model_builder = ModelBuilder(num_classes=1, num_frames=8)
+    model = model_builder.create_model()
+    model.summary(line_length=120)

@@ -10,12 +10,12 @@ class FeatureExtractor(keras.layers.Layer):
 
         self.xcep_backbone = keras.applications.Xception(
             include_top=False, weights="imagenet", pooling="avg",
-            input_shape=(299,299,3), name="Xception_Backbone"
+            input_shape=(299,299,3)
         )
 
         self.eff_backbone = keras.applications.EfficientNetB0(
             include_top=False, weights="imagenet", pooling="avg",
-            input_shape=(224,224,3), name="EfficientNetB0_Backbone"
+            input_shape=(224,224,3)
         )
 
         self._apply_freeze_ratio(self.xcep_backbone, self.freeze_ratio)
