@@ -7,7 +7,10 @@ class Logger(tf.keras.callbacks.Callback):
     def __init__(self, log_dir):
         super(Logger, self).__init__()
         self.log_dir = log_dir
-        self.writer = tf.summary.create_file_writer(os.path.join(log_dir, datetime.now().strftime("%Y%m%d-%H%M%S")))
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.current_log_dir = os.path.join(self.log_dir, datetime.now().strftime("%Y%m%d-%H%M%S"))
+        os.makedirs(self.current_log_dir, exist_ok=True)
+        self.writer = tf.summary.create_file_writer(self.current_log_dir)
 
     def on_epoch_end(self, epoch, logs=None):
         # Ghi log vào TensorBoard
