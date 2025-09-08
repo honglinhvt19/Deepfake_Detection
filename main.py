@@ -9,7 +9,7 @@ def main():
                         help="Mode to run: train, evaluate, or inference")
     parser.add_argument('--config', type=str, default='./configs/config.yaml',
                         help="Path to config file")
-    parser.add_argument('--checkpoint', type=str, default='./checkpoints/best_model.h5',
+    parser.add_argument('--checkpoint', type=str, default='./checkpoints/best_model.keras',
                         help="Path to model checkpoint (for evaluate/inference)")
     parser.add_argument('--video', type=str, help="Path to video file (for inference)")
     
