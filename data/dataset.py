@@ -5,7 +5,7 @@ import numpy as np
 from data.preprocessing import extract_frames, IMAGE_SIZE
 
 class Dataset:
-    def __init__(self, root_dir, split="train", batch_size=16, num_frames=8, shuffle=True, augment=False):
+    def __init__(self, root_dir, split="train", batch_size=8, num_frames=8, shuffle=True, augment=False):
 
         self.root_dir = root_dir
         self.split = split

@@ -5,7 +5,7 @@ from keras.layers import Layer, MultiHeadAttention, Dropout, LayerNormalization,
 @keras.saving.register_keras_serializable(package="Custom")
 class Transformer(Layer):
     def __init__(self, head_size, num_heads, ff_dim, dropout=0.1, use_spatial_attention=True, name="Transformer", **kwargs):
-        super().__init__(dtype="float32", **kwargs)
+        super().__init__( **kwargs)
         self.head_size = head_size
         self.num_heads = num_heads
         self.ff_dim = ff_dim
