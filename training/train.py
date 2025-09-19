@@ -6,7 +6,6 @@ import math
 import tensorflow as tf
 import keras
 import gc
-from keras.callbacks import ReduceLROnPlateau
 from keras import mixed_precision
 from data.dataset import Dataset
 from utils.checkpoint import create_checkpoint_callback, load_checkpoint
@@ -127,7 +126,7 @@ def train(config_path, resume_from_checkpoint=False):
             num_transformer_layers=config['model']['num_transformer_layers'],
             dropout_rate=config['model']['dropout_rate'],
             use_spatial_attention=config['model']['use_spatial_attention'],
-            freeze_ratio=config['training'].get('fine_tune_freeze_ratio', 0.8)  # default 70%
+            freeze_ratio=config['training'].get('fine_tune_freeze_ratio', 0.8)
         )
         model = model_builder_ft.create_model()
         

@@ -4,7 +4,7 @@ model:
   embed_dims: 256
   num_heads: 8
   ff_dim: 2048
-  num_transformer_layers: 6 # number of transformer layers
+  num_transformer_layers: 4 # number of transformer layers
   dropout_rate: 0.4 #spatial dropout rate
   use_spatial_attention: true # whether to use spatial attention
 
@@ -16,7 +16,7 @@ data:
   normalize: true
 
 training:
-  epochs: 80
+  epochs: 20
   learning_rate: 0.001
   fine-tune_lr: 0.00001
   freeze_epochs: 10

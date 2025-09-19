@@ -38,18 +38,21 @@ class Transformer(Layer):
     def call(self, inputs, training=False):
         x = inputs 
 
-        # ---------------- Spatial Attention ----------------
-        if self.use_spatial_attention:
-            x_spatial = self.spatial_att(x, x, training=training)
-            x = self.spatial_norm(x + x_spatial)
+        # # ---------------- Spatial Attention ----------------
+        # if self.use_spatial_attention:
+        #     x_spatial = self.spatial_att(x, x, training=training)
+        #     x = self.spatial_norm(x + x_spatial)
 
         # ---------------- Temporal Attention ----------------
         attn_output = self.att(x, x, training=training)
         attn_output = self.dropout1(attn_output, training=training)
+        x = tf.cast(x, tf.float32)
+        attn_output = tf.cast(attn_output, tf.float32)
         out1 = self.norm1(x + attn_output)
 
         ffn_output = self.ffn(out1, training=training)
         ffn_output = self.dropout2(ffn_output, training=training)
+        ffn_output = tf.cast(ffn_output, tf.float32)
         ffn_output = self.norm2(out1 + ffn_output)
         return ffn_output
 
